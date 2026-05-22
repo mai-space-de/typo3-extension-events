@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 defined('TYPO3') or die();
 
-// Register the "Events View" content element
+use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
+
+// Register the "Events View" content element (DataProcessor-based, not Extbase)
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPlugin(
     [
         'label' => 'LLL:EXT:mai_events/Resources/Private/Language/locallang_db.xlf:tt_content.CType.mai_events_view',
         'value' => 'mai_events_view',
-        'icon' => 'EXT:mai_base/Resources/Public/Icons/generic_content.svg',
+        'icon' => 'mai-content',
         'group' => 'default',
     ],
     'CType',
@@ -36,3 +38,12 @@ $GLOBALS['TCA']['tt_content']['types']['mai_events_view'] = [
         ],
     ],
 ];
+
+// Register the "Event Registration" Extbase plugin content element
+ExtensionUtility::registerPlugin(
+    'MaiEvents',
+    'Registration',
+    'LLL:EXT:mai_events/Resources/Private/Language/locallang_db.xlf:plugin.registration.title',
+    'mai-content',
+    'default',
+);

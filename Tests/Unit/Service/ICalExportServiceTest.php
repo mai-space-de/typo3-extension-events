@@ -102,7 +102,7 @@ class ICalExportServiceTest extends TestCase
         $event = $this->makeEvent(
             start: '2024-06-15 00:00:00',
             end: '2024-06-15 00:00:00',
-            allDay: true
+            allDay: true,
         );
         $output = $this->service->generate([$event]);
         self::assertStringContainsString('DTSTART;VALUE=DATE:20240615', $output);

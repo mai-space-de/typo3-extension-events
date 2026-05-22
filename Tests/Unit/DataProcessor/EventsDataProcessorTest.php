@@ -80,8 +80,8 @@ class EventsDataProcessorTest extends TestCase
     {
         $events = [];
         for ($i = 1; $i <= 20; $i++) {
-            $day = str_pad((string)$i, 2, '0', STR_PAD_LEFT);
-            $events[] = $this->makeEvent((string)$i, "Event $i", "2024-06-{$day} 10:00", "2024-06-{$day} 11:00");
+            $day = str_pad((string) $i, 2, '0', STR_PAD_LEFT);
+            $events[] = $this->makeEvent((string) $i, "Event $i", "2024-06-{$day} 10:00", "2024-06-{$day} 11:00");
         }
 
         $provider = $this->createMock(EventProviderInterface::class);
@@ -237,7 +237,7 @@ class EventsDataProcessorTest extends TestCase
             $cObj,
             [],
             ['viewMode' => 'list'],
-            ['existingKey' => 'existingValue']
+            ['existingKey' => 'existingValue'],
         );
 
         self::assertSame('existingValue', $result['existingKey']);

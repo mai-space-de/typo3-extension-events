@@ -23,12 +23,12 @@ class EventsController extends AbstractActionController
     public function icalExportAction(): ResponseInterface
     {
         $start = $this->resolveDate(
-            $this->request->hasArgument('start') ? (string)$this->request->getArgument('start') : '',
-            new \DateTimeImmutable('first day of this month')
+            $this->request->hasArgument('start') ? (string) $this->request->getArgument('start') : '',
+            new \DateTimeImmutable('first day of this month'),
         );
         $end = $this->resolveDate(
-            $this->request->hasArgument('end') ? (string)$this->request->getArgument('end') : '',
-            new \DateTimeImmutable('last day of this month midnight')
+            $this->request->hasArgument('end') ? (string) $this->request->getArgument('end') : '',
+            new \DateTimeImmutable('last day of this month midnight'),
         );
 
         $events = $this->aggregateEvents($start, $end);

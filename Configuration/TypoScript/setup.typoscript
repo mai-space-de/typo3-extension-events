@@ -1,46 +1,67 @@
 # mai_events TypoScript Setup
 
-plugin.tx_maievents {
-    view {
-        templateRootPaths {
-            0 = EXT:mai_events/Resources/Private/Templates/
+plugin {
+    tx_maievents {
+        view {
+            templateRootPaths {
+                0 = {$plugin.tx_maievents.view.templateRootPaths.0}
+            }
+            partialRootPaths {
+                0 = {$plugin.tx_maievents.view.partialRootPaths.0}
+            }
+            layoutRootPaths {
+                0 = {$plugin.tx_maievents.view.layoutRootPaths.0}
+            }
         }
-        partialRootPaths {
-            0 = EXT:mai_events/Resources/Private/Partials/
-        }
-        layoutRootPaths {
-            0 = EXT:mai_events/Resources/Private/Layouts/
+        settings {
+            defaultViewMode = {$plugin.tx_maievents.settings.defaultViewMode}
+            listLimit = {$plugin.tx_maievents.settings.listLimit}
         }
     }
-    settings {
-        defaultViewMode = {$plugin.tx_maievents.settings.defaultViewMode}
-        listLimit = {$plugin.tx_maievents.settings.listLimit}
+    tx_maievents_registration {
+        view {
+            templateRootPaths {
+                0 = {$plugin.tx_maievents.view.templateRootPaths.0}
+            }
+            partialRootPaths {
+                0 = {$plugin.tx_maievents.view.partialRootPaths.0}
+            }
+            layoutRootPaths {
+                0 = {$plugin.tx_maievents.view.layoutRootPaths.0}
+            }
+        }
     }
 }
 
 # Content element: Events View
-tt_content.mai_events_view = FLUIDTEMPLATE
-tt_content.mai_events_view {
-    templateName = Events/Month
-    templateRootPaths {
-        0 = EXT:mai_events/Resources/Private/Templates/
-    }
-    partialRootPaths {
-        0 = EXT:mai_events/Resources/Private/Partials/
-    }
-    layoutRootPaths {
-        0 = EXT:mai_events/Resources/Private/Layouts/
-    }
-    dataProcessing {
-        10 = Maispace\MaiEvents\DataProcessor\EventsDataProcessor
-        10 {
-            targetVariable = events
-            viewMode = TEXT
-            viewMode.data = flexform:settings.viewMode
-            viewMode.ifEmpty = month
-            listLimit = TEXT
-            listLimit.data = flexform:settings.listLimit
-            listLimit.ifEmpty = 10
+tt_content {
+    mai_events_view = FLUIDTEMPLATE
+    mai_events_view {
+        templateName = Events/Month
+        templateRootPaths {
+            0 = {$plugin.tx_maievents.view.templateRootPaths.0}
+        }
+        partialRootPaths {
+            0 = {$plugin.tx_maievents.view.partialRootPaths.0}
+        }
+        layoutRootPaths {
+            0 = {$plugin.tx_maievents.view.layoutRootPaths.0}
+        }
+        dataProcessing {
+            10 = Maispace\MaiEvents\DataProcessor\EventsDataProcessor
+            10 {
+                targetVariable = events
+                viewMode = TEXT
+                viewMode {
+                    data = flexform:settings.viewMode
+                    ifEmpty = month
+                }
+                listLimit = TEXT
+                listLimit {
+                    data = flexform:settings.listLimit
+                    ifEmpty = 10
+                }
+            }
         }
     }
 }

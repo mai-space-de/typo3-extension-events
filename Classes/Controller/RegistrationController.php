@@ -113,7 +113,7 @@ class RegistrationController extends AbstractActionController
             ->to(new Address($registration->getEmail(), $registration->getFullName()))
             ->subject($event->getTitle() . ' – Registrierung bestätigen')
             ->text(
-                'Bitte bestätigen Sie Ihre Anmeldung unter: ' . $confirmUrl
+                'Bitte bestätigen Sie Ihre Anmeldung unter: ' . $confirmUrl,
             )
             ->send();
     }

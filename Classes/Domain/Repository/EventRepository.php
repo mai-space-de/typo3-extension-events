@@ -22,7 +22,7 @@ class EventRepository extends Repository
     {
         $query = $this->createQuery();
         $query->matching(
-            $query->greaterThanOrEqual('startDate', time())
+            $query->greaterThanOrEqual('startDate', time()),
         );
         $query->setLimit($limit);
         return $query->execute();
@@ -34,8 +34,8 @@ class EventRepository extends Repository
         $query->matching(
             $query->logicalAnd(
                 $query->greaterThanOrEqual('startDate', $start->getTimestamp()),
-                $query->lessThan('startDate', $end->getTimestamp())
-            )
+                $query->lessThan('startDate', $end->getTimestamp()),
+            ),
         );
         return $query->execute();
     }

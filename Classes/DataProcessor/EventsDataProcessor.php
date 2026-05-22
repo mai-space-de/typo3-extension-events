@@ -46,9 +46,9 @@ class EventsDataProcessor implements DataProcessorInterface
         ContentObjectRenderer $cObj,
         array $contentObjectConfiguration,
         array $processorConfiguration,
-        array $processedData
+        array $processedData,
     ): array {
-        $targetVariable = (string)($processorConfiguration['targetVariable'] ?? 'calendar');
+        $targetVariable = (string) ($processorConfiguration['targetVariable'] ?? 'calendar');
         $viewMode = $this->resolveViewMode($processorConfiguration, $processedData);
         $currentDate = $this->resolveCurrentDate($processorConfiguration, $processedData);
 
@@ -69,7 +69,7 @@ class EventsDataProcessor implements DataProcessorInterface
         } elseif ($viewMode === 'week') {
             $calendarData['weeks'] = $this->buildWeekGrid($currentDate, $events);
         } elseif ($viewMode === 'list') {
-            $limit = (int)($processorConfiguration['listLimit'] ?? 10);
+            $limit = (int) ($processorConfiguration['listLimit'] ?? 10);
             $calendarData['events'] = array_slice($events, 0, $limit > 0 ? $limit : count($events));
         }
 
@@ -91,7 +91,7 @@ class EventsDataProcessor implements DataProcessorInterface
             return $requestMode;
         }
 
-        $configMode = (string)($processorConfiguration['viewMode'] ?? 'month');
+        $configMode = (string) ($processorConfiguration['viewMode'] ?? 'month');
         if (in_array($configMode, $allowed, true)) {
             return $configMode;
         }
@@ -113,7 +113,7 @@ class EventsDataProcessor implements DataProcessorInterface
             }
         }
 
-        $configDate = (string)($processorConfiguration['date'] ?? '');
+        $configDate = (string) ($processorConfiguration['date'] ?? '');
         if ($configDate !== '') {
             $parsed = \DateTimeImmutable::createFromFormat('Y-m-d', $configDate);
             if ($parsed !== false) {
@@ -222,7 +222,7 @@ class EventsDataProcessor implements DataProcessorInterface
         \DateTimeImmutable $gridStart,
         \DateTimeImmutable $gridEnd,
         \DateTimeImmutable $referenceMonth,
-        array $events
+        array $events,
     ): array {
         $today = new \DateTimeImmutable('today');
         $weeks = [];
@@ -233,7 +233,7 @@ class EventsDataProcessor implements DataProcessorInterface
             $dayEnd = $day->setTime(23, 59, 59);
             $dayEvents = array_values(array_filter(
                 $events,
-                static fn(Event $e) => $e->getStart() <= $dayEnd && $e->getEnd() >= $day
+                static fn(Event $e) => $e->getStart() <= $dayEnd && $e->getEnd() >= $day,
             ));
 
             $week[] = [

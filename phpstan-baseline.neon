@@ -1,2 +1,7 @@
 parameters:
-    ignoreErrors:
+	ignoreErrors:
+		-
+			message: '#^Call to an undefined method TYPO3\\CMS\\Core\\Mail\\MailMessage\:\:send\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: Classes/Controller/RegistrationController.php

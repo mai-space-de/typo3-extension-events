@@ -3,6 +3,9 @@
     <file source-language="en" datatype="plaintext" original="EXT:mai_events/Resources/Private/Language/locallang_db.xlf" date="2024-01-01T00:00:00Z" product-name="mai_events">
         <header/>
         <body>
+            <trans-unit id="plugin.registration.title" resname="plugin.registration.title">
+                <source>Event Registration</source>
+            </trans-unit>
             <trans-unit id="tt_content.CType.mai_events_view" resname="tt_content.CType.mai_events_view">
                 <source>Calendar View</source>
             </trans-unit>

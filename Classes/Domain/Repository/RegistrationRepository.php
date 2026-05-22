@@ -22,7 +22,7 @@ class RegistrationRepository extends Repository
     {
         $query = $this->createQuery();
         $query->matching(
-            $query->equals('event', $eventUid)
+            $query->equals('event', $eventUid),
         );
         return $query->execute();
     }
@@ -33,8 +33,8 @@ class RegistrationRepository extends Repository
         $query->matching(
             $query->logicalAnd(
                 $query->equals('event', $eventUid),
-                $query->logicalNot($query->equals('status', 'cancelled'))
-            )
+                $query->logicalNot($query->equals('status', 'cancelled')),
+            ),
         );
         return $query->count();
     }
@@ -45,8 +45,8 @@ class RegistrationRepository extends Repository
         $query->matching(
             $query->logicalAnd(
                 $query->equals('event', $eventUid),
-                $query->equals('waitingList', true)
-            )
+                $query->equals('waitingList', true),
+            ),
         );
         return $query->execute();
     }
@@ -55,7 +55,7 @@ class RegistrationRepository extends Repository
     {
         $query = $this->createQuery();
         $query->matching(
-            $query->equals('confirmationToken', $token)
+            $query->equals('confirmationToken', $token),
         );
         $result = $query->execute()->getFirst();
         return $result;

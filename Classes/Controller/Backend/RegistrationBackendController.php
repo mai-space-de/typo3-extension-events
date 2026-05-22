@@ -32,7 +32,7 @@ class RegistrationBackendController extends AbstractBackendController
         $moduleTemplate = $this->createModuleTemplate();
 
         $events = $this->eventRepository->findAll();
-        $selectedEventUid = (int)($this->request->getParsedBody()['eventUid']
+        $selectedEventUid = (int) ($this->request->getParsedBody()['eventUid']
             ?? $this->request->getQueryParams()['eventUid']
             ?? 0);
 
@@ -51,7 +51,7 @@ class RegistrationBackendController extends AbstractBackendController
 
     public function exportCsvAction(): ResponseInterface
     {
-        $eventUid = (int)($this->request->getParsedBody()['eventUid']
+        $eventUid = (int) ($this->request->getParsedBody()['eventUid']
             ?? $this->request->getQueryParams()['eventUid']
             ?? 0);
 

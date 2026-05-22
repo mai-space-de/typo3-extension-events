@@ -10,7 +10,7 @@ use Maispace\MaiEvents\Domain\Repository\EventRepository;
 class TxEventProvider implements EventProviderInterface
 {
     public function __construct(
-        private readonly EventRepository $eventRepository
+        private readonly EventRepository $eventRepository,
     ) {}
 
     public function getEvents(\DateTimeInterface $start, \DateTimeInterface $end): array
@@ -32,7 +32,7 @@ class TxEventProvider implements EventProviderInterface
                 end: $endDt,
                 description: $record->getDescription(),
                 location: $record->getLocation(),
-                source: 'tx_maievents'
+                source: 'tx_maievents',
             );
         }
 
