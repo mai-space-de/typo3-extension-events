@@ -9,18 +9,9 @@
             "role": "Developer"
         }
     ],
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../*",
-            "options": {
-                "symlink": true
-            }
-        }
-    ],
     "require": {
         "php": "^8.2",
-        "maispace/mai-base": "@dev",
+        "maispace/mai-base": "^14.0",
         "typo3/cms-core": "^14.1",
         "typo3/cms-extbase": "^14.1",
         "typo3/cms-fluid": "^14.1"
