@@ -31,3 +31,8 @@ services:
 
   Maispace\MaiEvents\Controller\Backend\RegistrationBackendController:
     public: true
+
+  Maispace\MaiEvents\Indexer\EventIndexer:
+    tags:
+      - name: 'maispace.search.indexer'
+      - name: 'maispace.search.result_formatter'
