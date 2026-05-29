@@ -6,6 +6,7 @@ namespace Maispace\MaiEvents\DataProcessor;
 
 use Maispace\MaiEvents\Domain\Model\Event;
 use Maispace\MaiEvents\EventProvider\EventProviderInterface;
+use Maispace\MaiEvents\EventProvider\TxEventProvider;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
@@ -37,33 +38,39 @@ use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
 class EventsDataProcessor implements DataProcessorInterface
 {
     /**
-     * @param iterable<EventProviderInterface>|null $eventProviders
+     * @param iterable<EventProviderInterface>|null $eventProviders Explicit providers for tests; null resolves from container at runtime
      */
     public function __construct(
-        private readonly iterable|null $eventProviders = null,
+        private readonly ?iterable $eventProviders = null,
     ) {}
 
+    /**
+     * @return iterable<EventProviderInterface>
+     */
     private function getEventProviders(): iterable
     {
         if ($this->eventProviders !== null) {
-            return $this->eventProviders;
+            yield from $this->eventProviders;
+
+            return;
         }
 
-        // Fallback: fetch tagged providers from container when instantiated without full DI
         try {
             $container = GeneralUtility::getContainer();
-            if ($container->has('Maispace\MaiEvents\DataProcessor\EventsDataProcessor')) {
-                $instance = $container->get('Maispace\MaiEvents\DataProcessor\EventsDataProcessor');
-                if ($instance instanceof self && $instance->eventProviders !== null) {
-                    return $instance->eventProviders;
+            if ($container->has(self::class)) {
+                $instance = $container->get(self::class);
+                if ($instance !== $this && $instance->eventProviders !== null) {
+                    yield from $instance->eventProviders;
+
+                    return;
                 }
             }
-        } catch (\Exception $e) {
-            // Container unavailable or error — continue with default
+            if ($container->has(TxEventProvider::class)) {
+                yield $container->get(TxEventProvider::class);
+            }
+        } catch (\Throwable) {
+            // Container unavailable or error — continue with empty result
         }
-
-        // Last resort: return empty iterator
-        return new \ArrayIterator([]);
     }
 
     public function process(
