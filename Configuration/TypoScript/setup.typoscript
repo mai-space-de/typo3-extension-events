@@ -37,7 +37,7 @@ plugin {
 tt_content {
     mai_events_view = FLUIDTEMPLATE
     mai_events_view {
-        templateName = Events/Month
+        templateName = Calendar/Month
         templateRootPaths {
             0 = {$plugin.tx_maievents.view.templateRootPaths.0}
         }
