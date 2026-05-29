@@ -17,9 +17,8 @@ services:
     tags:
       - name: maispace.events.event_provider
 
-  Maispace\MaiEvents\DataProcessor\EventsDataProcessor:
-    arguments:
-      $eventProviders: !tagged_iterator maispace.events.event_provider
+  # EventsDataProcessor is instantiated by TYPO3's FLUIDTEMPLATE via GeneralUtility::makeInstance()
+  # It resolves event providers from container at runtime (no constructor injection)
 
   Maispace\MaiEvents\Controller\EventsController:
     arguments:

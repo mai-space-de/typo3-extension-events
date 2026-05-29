@@ -37,34 +37,18 @@ use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
  */
 class EventsDataProcessor implements DataProcessorInterface
 {
-    /**
-     * @param iterable<EventProviderInterface>|null $eventProviders Explicit providers for tests; null resolves from container at runtime
-     */
-    public function __construct(
-        private readonly ?iterable $eventProviders = null,
-    ) {}
+    public function __construct()
+    {
+        // No-op constructor - DataProcessors are instantiated via GeneralUtility::makeInstance() without arguments
+    }
 
     /**
      * @return iterable<EventProviderInterface>
      */
     private function getEventProviders(): iterable
     {
-        if ($this->eventProviders !== null) {
-            yield from $this->eventProviders;
-
-            return;
-        }
-
         try {
             $container = GeneralUtility::getContainer();
-            if ($container->has(self::class)) {
-                $instance = $container->get(self::class);
-                if ($instance !== $this && $instance->eventProviders !== null) {
-                    yield from $instance->eventProviders;
-
-                    return;
-                }
-            }
             if ($container->has(TxEventProvider::class)) {
                 yield $container->get(TxEventProvider::class);
             }
