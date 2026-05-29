@@ -6,6 +6,7 @@ namespace Maispace\MaiEvents\DataProcessor;
 
 use Maispace\MaiEvents\Domain\Model\Event;
 use Maispace\MaiEvents\EventProvider\EventProviderInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
 
@@ -36,11 +37,34 @@ use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
 class EventsDataProcessor implements DataProcessorInterface
 {
     /**
-     * @param iterable<EventProviderInterface> $eventProviders
+     * @param iterable<EventProviderInterface>|null $eventProviders
      */
     public function __construct(
-        private readonly iterable $eventProviders,
+        private readonly iterable|null $eventProviders = null,
     ) {}
+
+    private function getEventProviders(): iterable
+    {
+        if ($this->eventProviders !== null) {
+            return $this->eventProviders;
+        }
+
+        // Fallback: fetch tagged providers from container when instantiated without full DI
+        try {
+            $container = GeneralUtility::getContainer();
+            if ($container->has('Maispace\MaiEvents\DataProcessor\EventsDataProcessor')) {
+                $instance = $container->get('Maispace\MaiEvents\DataProcessor\EventsDataProcessor');
+                if ($instance instanceof self && $instance->eventProviders !== null) {
+                    return $instance->eventProviders;
+                }
+            }
+        } catch (\Exception $e) {
+            // Container unavailable or error — continue with default
+        }
+
+        // Last resort: return empty iterator
+        return new \ArrayIterator([]);
+    }
 
     public function process(
         ContentObjectRenderer $cObj,
@@ -161,7 +185,7 @@ class EventsDataProcessor implements DataProcessorInterface
     private function aggregateEvents(\DateTimeInterface $start, \DateTimeInterface $end): array
     {
         $events = [];
-        foreach ($this->eventProviders as $provider) {
+        foreach ($this->getEventProviders() as $provider) {
             $providerEvents = $provider->getEvents($start, $end);
             foreach ($providerEvents as $event) {
                 $events[] = $event;
