@@ -21,8 +21,6 @@ services:
   # It resolves event providers from container at runtime (no constructor injection)
 
   Maispace\MaiEvents\Controller\EventsController:
-    arguments:
-      $eventProviders: !tagged_iterator maispace.events.event_provider
     public: true
 
   Maispace\MaiEvents\Controller\RegistrationController:

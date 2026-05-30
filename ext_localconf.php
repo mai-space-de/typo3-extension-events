@@ -17,6 +17,16 @@ defined('TYPO3') or die();
 
     \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
         'MaiEvents',
+        'List',
+        [
+            \Maispace\MaiEvents\Controller\EventsController::class => 'list',
+        ],
+        [],
+        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT,
+    );
+
+    \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+        'MaiEvents',
         'Registration',
         [
             \Maispace\MaiEvents\Controller\RegistrationController::class => 'show, register, confirm',
