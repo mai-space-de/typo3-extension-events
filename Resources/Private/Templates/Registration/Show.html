@@ -8,6 +8,18 @@
         <div class="mai-registration">
             <h2><f:translate key="registration.form.headline" extensionName="mai_events" /></h2>
 
+            <f:form.validationResults>
+                <f:if condition="{validationResults.flattenedErrors}">
+                    <div class="mai-registration__errors">
+                        <f:for each="{validationResults.flattenedErrors}" as="errors" key="propertyName">
+                            <f:for each="{errors}" as="error">
+                                <p class="mai-registration__error">{error.message}</p>
+                            </f:for>
+                        </f:for>
+                    </div>
+                </f:if>
+            </f:form.validationResults>
+
             <f:form action="register" controller="Registration" extensionName="MaiEvents" pluginName="Registration"
                     method="post" additionalAttributes="{novalidate: 'novalidate'}">
                 <f:form.hidden name="eventUid" value="{event.uid}" />

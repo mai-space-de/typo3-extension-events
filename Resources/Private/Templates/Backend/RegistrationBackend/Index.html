@@ -7,6 +7,18 @@
 <be:pageRenderer />
 
 <div class="mai-registrations">
+    <f:form.validationResults>
+        <f:if condition="{validationResults.flattenedErrors}">
+            <div class="mai-registrations__errors">
+                <f:for each="{validationResults.flattenedErrors}" as="errors" key="propertyName">
+                    <f:for each="{errors}" as="error">
+                        <p class="mai-registrations__error">{error.message}</p>
+                    </f:for>
+                </f:for>
+            </div>
+        </f:if>
+    </f:form.validationResults>
+
     <f:form action="exportCsv" controller="RegistrationBackend" extensionName="MaiEvents" method="get">
         <div class="form-group">
             <label for="eventSelect"><f:translate key="backend.registration.selectEvent" extensionName="mai_events" /></label>
@@ -22,9 +34,21 @@
     <f:if condition="{selectedEventUid} > 0">
         <f:if condition="{registrations}">
             <f:then>
+                <f:form.validationResults>
+                    <f:if condition="{validationResults.flattenedErrors}">
+                        <div class="mai-registrations__errors">
+                            <f:for each="{validationResults.flattenedErrors}" as="errors" key="propertyName">
+                                <f:for each="{errors}" as="error">
+                                    <p class="mai-registrations__error">{error.message}</p>
+                                </f:for>
+                            </f:for>
+                        </div>
+                    </f:if>
+                </f:form.validationResults>
+
                 <f:form action="exportCsv" controller="RegistrationBackend" extensionName="MaiEvents" method="get">
                     <f:form.hidden name="eventUid" value="{selectedEventUid}" />
-                    <button type="submit" class="btn btn-default">
+                    <button type="submit" class="btn btn-default" aria-label="{f:translate(key: 'backend.registration.exportCsv', extensionName: 'mai_events')}">
                         <f:translate key="backend.registration.exportCsv" extensionName="mai_events" />
                     </button>
                 </f:form>
