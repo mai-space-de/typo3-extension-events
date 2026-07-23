@@ -14,11 +14,19 @@ services:
       - name: maispace.events.event_provider
 
   Maispace\MaiEvents\EventProvider\TxEventProvider:
+    public: true
     tags:
       - name: maispace.events.event_provider
 
+  Maispace\MaiEvents\Domain\Repository\EventRepository:
+    public: true
+
   # EventsDataProcessor is instantiated by TYPO3's FLUIDTEMPLATE via GeneralUtility::makeInstance()
   # It resolves event providers from container at runtime (no constructor injection)
+
+  # DataHandler instantiates hooks via GeneralUtility::makeInstance() — must be public for DI
+  Maispace\MaiEvents\Hook\EventCacheInvalidationHook:
+    public: true
 
   Maispace\MaiEvents\Controller\EventsController:
     public: true

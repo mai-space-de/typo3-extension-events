@@ -15,6 +15,7 @@ use Symfony\Component\Mime\Address;
 use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\Persistence\PersistenceManagerInterface;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 class RegistrationController extends AbstractActionController
 {
@@ -31,12 +32,12 @@ class RegistrationController extends AbstractActionController
     {
         $eventUid = $this->resolveEventUid($eventUid);
         if ($eventUid === 0) {
-            return $this->htmlResponse('<p>No event available for registration.</p>');
+            return $this->htmlResponse('<p class="mai-registration__empty">' . htmlspecialchars($this->translateOrDefault('registration.noEventAvailable', 'No event available for registration.')) . '</p>');
         }
 
         $event = $this->eventRepository->findByUid($eventUid);
         if (!$event instanceof EventRecord) {
-            return $this->htmlResponse('<p>Event not found.</p>');
+            return $this->htmlResponse('<p class="mai-registration__empty">' . htmlspecialchars($this->translateOrDefault('registration.eventNotFound', 'Event not found.')) . '</p>');
         }
 
         $registrationCount = $this->registrationRepository->countByEvent($eventUid);
@@ -58,7 +59,7 @@ class RegistrationController extends AbstractActionController
     {
         $event = $this->eventRepository->findByUid($eventUid);
         if (!$event instanceof EventRecord) {
-            return $this->htmlResponse('<p>Event not found.</p>');
+            return $this->htmlResponse('<p class="mai-registration__empty">' . htmlspecialchars($this->translateOrDefault('registration.eventNotFound', 'Event not found.')) . '</p>');
         }
 
         $registrationCount = $this->registrationRepository->countByEvent($eventUid);
@@ -121,6 +122,11 @@ class RegistrationController extends AbstractActionController
                 'Bitte bestätigen Sie Ihre Anmeldung unter: ' . $confirmUrl,
             )
             ->send();
+    }
+
+    private function translateOrDefault(string $key, string $default): string
+    {
+        return LocalizationUtility::translate($key, 'mai_events') ?? $default;
     }
 
     private function resolveEventUid(int $eventUid): int

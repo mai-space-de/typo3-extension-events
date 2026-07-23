@@ -31,6 +31,9 @@ class EventRepository extends Repository
     public function findByDateRange(\DateTimeInterface $start, \DateTimeInterface $end): QueryResultInterface
     {
         $query = $this->createQuery();
+        $querySettings = $query->getQuerySettings();
+        $querySettings->setStoragePageIds([27]);
+        $query->setQuerySettings($querySettings);
         $query->matching(
             $query->logicalAnd(
                 $query->greaterThanOrEqual('startDate', $start->getTimestamp()),

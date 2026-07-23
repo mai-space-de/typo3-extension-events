@@ -1,118 +1,154 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file source-language="en" datatype="plaintext" original="EXT:mai_events/Resources/Private/Language/locallang.xlf" date="2024-01-01T00:00:00Z" product-name="mai_events">
-        <header/>
+    <file source-language="en" target-language="de" datatype="plaintext" original="EXT:mai_events/Resources/Private/Language/locallang.xlf" date="2024-01-01T00:00:00Z" product-name="mai_events">
         <body>
             <trans-unit id="calendar.navigation.prev" resname="calendar.navigation.prev">
                 <source>Previous</source>
+                <target>Zurück</target>
             </trans-unit>
             <trans-unit id="calendar.navigation.next" resname="calendar.navigation.next">
                 <source>Next</source>
+                <target>Weiter</target>
             </trans-unit>
             <trans-unit id="calendar.navigation.today" resname="calendar.navigation.today">
                 <source>Today</source>
+                <target>Heute</target>
             </trans-unit>
             <trans-unit id="calendar.viewMode.month" resname="calendar.viewMode.month">
                 <source>Month</source>
+                <target>Monat</target>
             </trans-unit>
             <trans-unit id="calendar.viewMode.week" resname="calendar.viewMode.week">
                 <source>Week</source>
+                <target>Woche</target>
             </trans-unit>
             <trans-unit id="calendar.viewMode.list" resname="calendar.viewMode.list">
                 <source>List</source>
+                <target>Liste</target>
             </trans-unit>
             <trans-unit id="calendar.ical.download" resname="calendar.ical.download">
                 <source>Download iCalendar</source>
+                <target>iCalendar herunterladen</target>
             </trans-unit>
             <trans-unit id="calendar.noEvents" resname="calendar.noEvents">
                 <source>No events found.</source>
+                <target>Keine Termine gefunden.</target>
             </trans-unit>
             <trans-unit id="calendar.allDay" resname="calendar.allDay">
                 <source>All day</source>
+                <target>Ganztägig</target>
             </trans-unit>
             <trans-unit id="weekday.monday" resname="weekday.monday">
                 <source>Monday</source>
+                <target>Montag</target>
             </trans-unit>
             <trans-unit id="weekday.tuesday" resname="weekday.tuesday">
                 <source>Tuesday</source>
+                <target>Dienstag</target>
             </trans-unit>
             <trans-unit id="weekday.wednesday" resname="weekday.wednesday">
                 <source>Wednesday</source>
+                <target>Mittwoch</target>
             </trans-unit>
             <trans-unit id="weekday.thursday" resname="weekday.thursday">
                 <source>Thursday</source>
+                <target>Donnerstag</target>
             </trans-unit>
             <trans-unit id="weekday.friday" resname="weekday.friday">
                 <source>Friday</source>
+                <target>Freitag</target>
             </trans-unit>
             <trans-unit id="weekday.saturday" resname="weekday.saturday">
                 <source>Saturday</source>
+                <target>Samstag</target>
             </trans-unit>
             <trans-unit id="weekday.sunday" resname="weekday.sunday">
                 <source>Sunday</source>
+                <target>Sonntag</target>
             </trans-unit>
             <trans-unit id="registration.noEventAvailable" resname="registration.noEventAvailable">
                 <source>No event available for registration.</source>
+                <target>Keine Veranstaltung zur Anmeldung verfügbar.</target>
             </trans-unit>
             <trans-unit id="registration.eventNotFound" resname="registration.eventNotFound">
                 <source>Event not found.</source>
+                <target>Veranstaltung nicht gefunden.</target>
             </trans-unit>
             <trans-unit id="registration.form.headline" resname="registration.form.headline">
                 <source>Register for this event</source>
+                <target>Für diese Veranstaltung anmelden</target>
             </trans-unit>
             <trans-unit id="registration.firstName" resname="registration.firstName">
                 <source>First name</source>
+                <target>Vorname</target>
             </trans-unit>
             <trans-unit id="registration.lastName" resname="registration.lastName">
                 <source>Last name</source>
+                <target>Nachname</target>
             </trans-unit>
             <trans-unit id="registration.email" resname="registration.email">
                 <source>Email address</source>
+                <target>E-Mail-Adresse</target>
             </trans-unit>
             <trans-unit id="registration.submit" resname="registration.submit">
                 <source>Register now</source>
+                <target>Jetzt anmelden</target>
             </trans-unit>
             <trans-unit id="registration.closed" resname="registration.closed">
                 <source>Registration for this event is closed.</source>
+                <target>Die Anmeldung für diese Veranstaltung ist geschlossen.</target>
             </trans-unit>
             <trans-unit id="registration.success.headline" resname="registration.success.headline">
                 <source>Registration received</source>
+                <target>Anmeldung eingegangen</target>
             </trans-unit>
             <trans-unit id="registration.success.text" resname="registration.success.text">
                 <source>Thank you for registering. Please check your email to confirm your registration.</source>
+                <target>Vielen Dank für deine Anmeldung. Bitte bestätige sie über die E-Mail in deinem Postfach.</target>
             </trans-unit>
             <trans-unit id="registration.waitingList.notice" resname="registration.waitingList.notice">
                 <source>The event is fully booked. You have been added to the waiting list.</source>
+                <target>Die Veranstaltung ist ausgebucht. Du wurdest auf die Warteliste gesetzt.</target>
             </trans-unit>
             <trans-unit id="registration.confirm.headline" resname="registration.confirm.headline">
                 <source>Registration confirmed</source>
+                <target>Anmeldung bestätigt</target>
             </trans-unit>
             <trans-unit id="registration.confirm.text" resname="registration.confirm.text">
                 <source>Your registration for %1$s has been confirmed.</source>
+                <target>Deine Anmeldung für %1$s wurde bestätigt.</target>
             </trans-unit>
             <trans-unit id="registration.confirm.invalid" resname="registration.confirm.invalid">
                 <source>The confirmation link is invalid or has already been used.</source>
+                <target>Der Bestätigungslink ist ungültig oder wurde bereits verwendet.</target>
             </trans-unit>
             <trans-unit id="backend.registration.selectEvent" resname="backend.registration.selectEvent">
                 <source>Select event</source>
+                <target>Veranstaltung auswählen</target>
             </trans-unit>
             <trans-unit id="backend.registration.allEvents" resname="backend.registration.allEvents">
                 <source>All events</source>
+                <target>Alle Veranstaltungen</target>
             </trans-unit>
             <trans-unit id="backend.registration.exportCsv" resname="backend.registration.exportCsv">
                 <source>Export as CSV</source>
+                <target>Als CSV exportieren</target>
             </trans-unit>
             <trans-unit id="backend.registration.status" resname="backend.registration.status">
                 <source>Status</source>
+                <target>Status</target>
             </trans-unit>
             <trans-unit id="backend.registration.waitingList" resname="backend.registration.waitingList">
                 <source>Waiting list</source>
+                <target>Warteliste</target>
             </trans-unit>
             <trans-unit id="backend.registration.registeredAt" resname="backend.registration.registeredAt">
                 <source>Registered at</source>
+                <target>Angemeldet am</target>
             </trans-unit>
             <trans-unit id="backend.registration.noRegistrations" resname="backend.registration.noRegistrations">
                 <source>No registrations found for this event.</source>
+                <target>Keine Anmeldungen für diese Veranstaltung gefunden.</target>
             </trans-unit>
         </body>
     </file>

@@ -21,6 +21,7 @@
         "armin/editorconfig-cli": "^2.1",
         "friendsofphp/php-cs-fixer": "^3.0",
         "helmich/typo3-typoscript-lint": "^3.1",
+        "maispace/mai-seeder": "*",
         "phpstan/phpstan": "^2.0",
         "phpunit/phpunit": "^11.0",
         "saschaegerer/phpstan-typo3": "^3.0",
@@ -89,6 +90,10 @@
         {
             "type": "path",
             "url": "../typo3-extension-search"
+        },
+        {
+            "type": "path",
+            "url": "../typo3-extension-seeder"
         }
     ]
 }

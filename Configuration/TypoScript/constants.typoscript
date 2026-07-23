@@ -1,6 +1,10 @@
 # mai_events TypoScript Constants
 
 plugin.tx_maievents {
+    persistence {
+        # Default storage PID — override in site config (e.g. BGM setup.typoscript)
+        storagePid = 27
+    }
     view {
         templateRootPaths {
             0 = EXT:mai_events/Resources/Private/Templates/

@@ -103,7 +103,7 @@ class EventsController extends AbstractActionController
             if ($container->has(TxEventProvider::class)) {
                 yield $container->get(TxEventProvider::class);
             }
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
             // Container unavailable — continue with empty result
         }
     }
