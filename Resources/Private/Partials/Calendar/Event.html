@@ -4,56 +4,67 @@
 >
 
 <f:comment>
-    Single event partial.
+    Single event partial — redesigned to match BGM Pulheim design system.
     Arguments:
       {event}   – Maispace\MaiEvents\Domain\Model\Event instance
-      {compact} – 1 for compact (no description/location), 0 for full display
+      {compact} – 1 for compact (no description), 0 for full display
 </f:comment>
 
 <article class="mai-calendar__event {f:if(condition: compact, then: 'mai-calendar__event--compact')}">
 
-    <header class="mai-calendar__event-header">
-        <f:if condition="{event.url}">
-            <f:then>
-                <a class="mai-calendar__event-title" href="{event.url}">
-                    {event.title}
-                </a>
-            </f:then>
-            <f:else>
-                <span class="mai-calendar__event-title">{event.title}</span>
-            </f:else>
-        </f:if>
+    <div class="mai-calendar__event-date">
+        <span class="mai-calendar__event-day">
+            <f:format.date format="j" date="{event.start}" />
+        </span>
+        <span class="mai-calendar__event-month">
+            <f:format.date format="M" date="{event.start}" />
+        </span>
+    </div>
 
-        <time
-            class="mai-calendar__event-time"
-            datetime="{f:format.date(format: 'c', date: event.start)}"
-        >
-            <f:if condition="{event.allDay}">
+    <div class="mai-calendar__event-body">
+        <h3 class="mai-calendar__event-title">
+            <f:if condition="{event.url}">
                 <f:then>
-                    <f:translate key="calendar.allDay" extensionName="mai_events" />
+                    <a href="{event.url}">{event.title}</a>
                 </f:then>
                 <f:else>
-                    <f:format.date format="H:i" date="{event.start}" />
-                    –
-                    <f:format.date format="H:i" date="{event.end}" />
+                    {event.title}
                 </f:else>
             </f:if>
-        </time>
-    </header>
+        </h3>
 
-    <f:if condition="{compact} == 0">
-        <f:if condition="{event.location}">
-            <p class="mai-calendar__event-location">
-                {event.location}
-            </p>
-        </f:if>
+        <div class="mai-calendar__event-meta">
+            <time
+                class="mai-calendar__event-time"
+                datetime="{f:format.date(format: 'c', date: event.start)}"
+            >
+                <f:if condition="{event.allDay}">
+                    <f:then>
+                        <f:translate key="calendar.allDay" extensionName="mai_events" />
+                    </f:then>
+                    <f:else>
+                        <f:format.date format="H:i" date="{event.start}" />
+                        –
+                        <f:format.date format="H:i" date="{event.end}" />
+                    </f:else>
+                </f:if>
+            </time>
 
-        <f:if condition="{event.description}">
-            <div class="mai-calendar__event-description">
-                <f:format.html>{event.description}</f:format.html>
-            </div>
+            <f:if condition="{event.location}">
+                <span class="mai-calendar__event-location">
+                    {event.location}
+                </span>
+            </f:if>
+        </div>
+
+        <f:if condition="{compact} == 0">
+            <f:if condition="{event.description}">
+                <div class="mai-calendar__event-description">
+                    <f:format.html>{event.description}</f:format.html>
+                </div>
+            </f:if>
         </f:if>
-    </f:if>
+    </div>
 
 </article>
 
