@@ -6,46 +6,44 @@ namespace Maispace\MaiEvents\Controller;
 
 use Maispace\MaiBase\Controller\AbstractActionController;
 use Maispace\MaiBase\Controller\Traits\ResponseHelpersTrait;
-use Maispace\MaiEvents\Domain\Model\Event;
-use Maispace\MaiEvents\EventProvider\EventProviderInterface;
-use Maispace\MaiEvents\EventProvider\TxEventProvider;
+use Maispace\MaiEvents\Service\CalendarService;
 use Maispace\MaiEvents\Service\ICalExportService;
 use Psr\Http\Message\ResponseInterface;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class EventsController extends AbstractActionController
 {
     use ResponseHelpersTrait;
 
+    private const CALENDAR_TEMPLATES = [
+        'month' => 'Calendar/Month',
+        'week' => 'Calendar/Week',
+        'list' => 'Calendar/List',
+    ];
+
     public function __construct(
         private readonly ICalExportService $iCalExportService,
+        private readonly CalendarService $calendarService,
     ) {}
 
     public function listAction(): ResponseInterface
     {
-        $currentDate = new \DateTimeImmutable('today');
-        $start = $currentDate->setTime(0, 0, 0);
-        $end = $start->modify('+1 year')->setTime(23, 59, 59);
-        $events = $this->aggregateEvents($start, $end);
+        // Allow override via GET parameter, e.g. ?tx_maievents_view=week&tx_maievents_date=2024-06-01
+        $requestedViewMode = is_string($_GET['tx_maievents_view'] ?? null) ? $_GET['tx_maievents_view'] : null;
+        $requestedDate = is_string($_GET['tx_maievents_date'] ?? null) ? $_GET['tx_maievents_date'] : null;
 
-        $limit = (int) ($this->settings['listLimit'] ?? 10);
-        if ($limit > 0) {
-            $events = array_slice($events, 0, $limit);
-        }
+        $calendar = $this->calendarService->buildCalendar(
+            requestedViewMode: $requestedViewMode,
+            requestedDate: $requestedDate,
+            configuredViewMode: (string) ($this->settings['defaultViewMode'] ?? 'list'),
+            configuredDate: '',
+            listLimit: (int) ($this->settings['listLimit'] ?? 10),
+        );
 
-        $this->view->assign('calendar', [
-            'viewMode' => 'list',
-            'currentDate' => $currentDate,
-            'start' => $start,
-            'end' => $end,
-            'events' => $events,
-            'navigation' => [
-                'prev' => $currentDate->modify('-1 month'),
-                'next' => $currentDate->modify('+1 month'),
-            ],
-        ]);
+        $this->view->assign('calendar', $calendar);
 
-        return $this->htmlResponse();
+        $template = self::CALENDAR_TEMPLATES[$calendar['viewMode']] ?? self::CALENDAR_TEMPLATES['list'];
+
+        return $this->htmlResponse($this->view->render($template));
     }
 
     public function icalExportAction(): ResponseInterface
@@ -59,7 +57,7 @@ class EventsController extends AbstractActionController
             new \DateTimeImmutable('last day of this month midnight'),
         );
 
-        $events = $this->aggregateEvents($start, $end);
+        $events = $this->calendarService->aggregateEvents($start, $end);
         $icalContent = $this->iCalExportService->generate($events);
 
         return $this->fileDownloadResponse($icalContent, 'events.ics', 'text/calendar; charset=utf-8');
@@ -77,34 +75,5 @@ class EventsController extends AbstractActionController
         }
 
         return $parsed->setTime(0, 0, 0);
-    }
-
-    private function aggregateEvents(\DateTimeInterface $start, \DateTimeInterface $end): array
-    {
-        $events = [];
-        foreach ($this->getEventProviders() as $provider) {
-            foreach ($provider->getEvents($start, $end) as $event) {
-                $events[] = $event;
-            }
-        }
-
-        usort($events, static fn(Event $a, Event $b) => $a->getStart() <=> $b->getStart());
-
-        return $events;
-    }
-
-    /**
-     * @return iterable<EventProviderInterface>
-     */
-    private function getEventProviders(): iterable
-    {
-        try {
-            $container = GeneralUtility::getContainer();
-            if ($container->has(TxEventProvider::class)) {
-                yield $container->get(TxEventProvider::class);
-            }
-        } catch (\Throwable $e) {
-            // Container unavailable — continue with empty result
-        }
     }
 }

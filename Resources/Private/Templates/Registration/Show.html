@@ -10,7 +10,7 @@
 
             <f:form.validationResults>
                 <f:if condition="{validationResults.flattenedErrors}">
-                    <div class="mai-registration__errors">
+                    <div class="mai-registration__errors" role="alert">
                         <f:for each="{validationResults.flattenedErrors}" as="errors" key="propertyName">
                             <f:for each="{errors}" as="error">
                                 <p class="mai-registration__error">{error.message}</p>

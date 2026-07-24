@@ -18,6 +18,16 @@ class EventRepository extends Repository
         'startDate' => QueryInterface::ORDER_ASCENDING,
     ];
 
+    public function __construct()
+    {
+        parent::__construct();
+        // Repository::__construct() derives $objectType from the class name
+        // convention ("EventRepository" -> Domain\Model\Event), which here
+        // resolves to the plain ICS-import DTO instead of the persisted
+        // AbstractEntity. EventRecord is the actual entity for this table.
+        $this->objectType = EventRecord::class;
+    }
+
     public function findUpcoming(int $limit = 10): QueryResultInterface
     {
         $query = $this->createQuery();
