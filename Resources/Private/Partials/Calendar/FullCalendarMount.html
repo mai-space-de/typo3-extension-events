@@ -1,0 +1,58 @@
+<html
+    xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+    data-namespace-typo3-fluid="true"
+>
+
+<f:comment>
+    FullCalendar mount partial (scripts + calendar + info dialog + iCal).
+    Arguments: {calendar} from CalendarService / EventsDataProcessor
+</f:comment>
+
+<f:asset.script
+    identifier="mai-events-fullcalendar"
+    src="EXT:mai_events/Resources/Public/Vendor/fullcalendar/index.global.min.js"
+    defer="1"
+/>
+<f:asset.script
+    identifier="mai-events-fullcalendar-locales"
+    src="EXT:mai_events/Resources/Public/Vendor/fullcalendar/locales-all.global.min.js"
+    defer="1"
+/>
+<f:asset.script
+    identifier="mai-events-fullcalendar-init"
+    src="EXT:mai_events/Resources/Public/JavaScript/fullcalendar-init.js"
+    defer="1"
+/>
+
+<div
+    class="mai-calendar mai-calendar--fullcalendar"
+    data-mai-calendar="1"
+    data-initial-view="{calendar.initialView}"
+    data-locale="{calendar.locale}"
+    data-initial-date="{f:format.date(format: 'Y-m-d', date: calendar.currentDate)}"
+    data-label-today="{f:translate(key: 'calendar.navigation.today', extensionName: 'mai_events')}"
+    data-label-month="{f:translate(key: 'calendar.viewMode.month', extensionName: 'mai_events')}"
+    data-label-week="{f:translate(key: 'calendar.viewMode.week', extensionName: 'mai_events')}"
+    data-label-list="{f:translate(key: 'calendar.viewMode.list', extensionName: 'mai_events')}"
+    data-label-all-day="{f:translate(key: 'calendar.allDay', extensionName: 'mai_events')}"{f:if(condition: calendar.contentUid, then: ' id="c{calendar.contentUid}"')}
+>
+    <script type="application/json" class="mai-calendar__events-json">{calendar.fullCalendarEvents -> f:format.json() -> f:format.raw()}</script>
+
+    <div class="mai-calendar__mount" role="region" aria-label="{f:translate(key: 'calendar.viewMode.month', extensionName: 'mai_events')}"></div>
+
+    <dialog class="mai-calendar-popup" aria-labelledby="mai-calendar-popup-title-{calendar.contentUid}">
+        <div class="mai-calendar-popup__panel">
+            <button type="button" class="mai-calendar-popup__close" aria-label="{f:translate(key: 'calendar.popup.close', extensionName: 'mai_events')}">
+                &times;
+            </button>
+            <h2 class="mai-calendar-popup__title" id="mai-calendar-popup-title-{calendar.contentUid}"></h2>
+            <p class="mai-calendar-popup__time"></p>
+            <p class="mai-calendar-popup__location" hidden></p>
+            <p class="mai-calendar-popup__description" hidden></p>
+        </div>
+    </dialog>
+
+    <f:render partial="Calendar/ICalLink" arguments="{calendar: calendar}" />
+</div>
+
+</html>

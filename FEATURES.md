@@ -1,23 +1,25 @@
 ## Event Records
 
-* Event records — custom TCA record type (`tx_maievents_event`) with date, location, categories (`sys_category`), and image
-* Recurring events — virtual series via `recurrence_frequency` (`daily` / `weekly` / `monthly` / `yearly`) and optional `recurrence_until` (empty = never ends); calendar and list views expand occurrences on-the-fly within the viewed date window
+* Event records — custom TCA record type (`tx_maievents_event`) with date, location, optional link (`LinkConfig`: page / url / file), categories (`sys_category`), and image
+* Recurring events — virtual series via `recurrence_frequency` (`daily` / `weekly` / `monthly` / `monthly_weekday` / `yearly`) and optional `recurrence_until` (empty = never ends); `monthly_weekday` repeats the 1st/2nd/3rd/4th/last weekday of each month (weekday from `start_date`, position in `recurrence_month_weekday`); calendar expands occurrences on-the-fly within the preload window
 * Registration records — event registration TCA (`tx_maievents_registration`) with attendee data, waiting-list support, and per-occurrence binding (`occurrence_start`)
 
 ## Calendar Views
 
-* Month view — full monthly grid with event indicators
-* Week view — seven-day view with event display
-* List view — chronological event list with configurable limit
+* FullCalendar UI — vendored FullCalendar 6 (dayGridMonth / timeGridWeek / listWeek) with client-side toolbar navigation; mobile-friendly
+* Initial view — FlexForm / GET `viewMode` maps to FullCalendar (`month`→`dayGridMonth`, `week`→`timeGridWeek`, `list`→`listWeek`)
+* Event link — optional TCA `link` resolved to a frontend URL; click navigates when set
+* Info popup — events without a link open a native `<dialog>` with title, time, location, and plain-text description
 * Category filter — FlexForm `categoryUid` on Calendar View / List plugin (empty = all categories); filters via `sys_category_record_mm`
-* Scroll anchors — prev/next and view-mode links append `#c{uid}` and the calendar root uses `id="c{uid}"` so navigation keeps the viewport on the content element
+* Scroll anchors — calendar root uses `id="c{uid}"` for deep-link scroll targets
+* Preload window — events for roughly today −3 months … +12 months are serialized as FullCalendar JSON so navigation needs no page reload
 
 ## Export & Integration
 
 * iCal export — export events as RFC 5545-compliant `.ics` files via `EventsController` (expanded occurrences in the export window; respects category filter)
 * EventProviderInterface — pluggable data source aggregation; implement `Maispace\MaiEvents\EventProvider\EventProviderInterface` to contribute events from other extensions
-* EventsDataProcessor — builds the calendar grid and navigation for Fluid templates
-* FlexForm settings — view mode (month / week / list), list limit, and category filter configurable per content element
+* EventsDataProcessor — builds FullCalendar payload (`fullCalendarEvents`, `initialView`, `locale`, `contentUid`) for Fluid mounts
+* FlexForm settings — view mode (month / week / list), list limit (compat), and category filter configurable per content element
 
 ## Event Registration
 

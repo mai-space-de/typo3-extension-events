@@ -65,7 +65,7 @@ lib.mai_events_flexformViewMode {
     ifEmpty = month
 }
 
-# Content element: Events View
+# Content element: Events View (FullCalendar)
 # Wrapped as COA_INT so this block always re-renders per request — its output
 # depends on tx_maievents_view/tx_maievents_date GET parameters, which are
 # excluded from cHash calculation (see ext_localconf.php) and must therefore
@@ -75,27 +75,7 @@ tt_content {
     mai_events_view {
         10 = FLUIDTEMPLATE
         10 {
-            file = TEXT
-            file {
-                cObject = CASE
-                cObject {
-                    key {
-                        data = GP:tx_maievents_view
-                        ifEmpty < lib.mai_events_flexformViewMode
-                    }
-
-                    month = TEXT
-                    month.value = EXT:mai_events/Resources/Private/Templates/Calendar/Month.html
-
-                    week = TEXT
-                    week.value = EXT:mai_events/Resources/Private/Templates/Calendar/Week.html
-
-                    list = TEXT
-                    list.value = EXT:mai_events/Resources/Private/Templates/Calendar/List.html
-
-                    default < .month
-                }
-            }
+            file = EXT:mai_events/Resources/Private/Templates/Calendar/FullCalendar.html
             partialRootPaths {
                 0 = {$plugin.tx_maievents.view.partialRootPaths.0}
             }

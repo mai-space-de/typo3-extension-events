@@ -9,16 +9,11 @@ use Maispace\MaiBase\Controller\Traits\ResponseHelpersTrait;
 use Maispace\MaiEvents\Service\CalendarService;
 use Maispace\MaiEvents\Service\ICalExportService;
 use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 
 class EventsController extends AbstractActionController
 {
     use ResponseHelpersTrait;
-
-    private const CALENDAR_TEMPLATES = [
-        'month' => 'Calendar/Month',
-        'week' => 'Calendar/Week',
-        'list' => 'Calendar/List',
-    ];
 
     public function __construct(
         private readonly ICalExportService $iCalExportService,
@@ -40,12 +35,11 @@ class EventsController extends AbstractActionController
             categoryUid: (int) ($this->settings['categoryUid'] ?? 0),
             contentUid: (int) ($this->getContentObjectData()['uid'] ?? 0),
         );
+        $calendar['locale'] = $this->resolveLocale();
 
         $this->view->assign('calendar', $calendar);
 
-        $template = self::CALENDAR_TEMPLATES[$calendar['viewMode']] ?? self::CALENDAR_TEMPLATES['list'];
-
-        return $this->htmlResponse($this->view->render($template));
+        return $this->htmlResponse($this->view->render('Calendar/FullCalendar'));
     }
 
     public function icalExportAction(): ResponseInterface
@@ -67,6 +61,23 @@ class EventsController extends AbstractActionController
         $icalContent = $this->iCalExportService->generate($events);
 
         return $this->fileDownloadResponse($icalContent, 'events.ics', 'text/calendar; charset=utf-8');
+    }
+
+    private function resolveLocale(): string
+    {
+        $language = $this->request->getAttribute('language');
+        if ($language instanceof SiteLanguage) {
+            $hreflang = $language->getHreflang();
+            if ($hreflang !== '') {
+                return strtolower(substr($hreflang, 0, 2));
+            }
+            $locale = $language->getLocale()->getName();
+            if ($locale !== '') {
+                return strtolower(substr($locale, 0, 2));
+            }
+        }
+
+        return 'de';
     }
 
     private function resolveDate(string $value, \DateTimeImmutable $default): \DateTimeImmutable

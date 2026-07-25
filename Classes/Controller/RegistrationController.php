@@ -207,6 +207,7 @@ class RegistrationController extends AbstractActionController
             $event->getRecurrenceFrequency(),
             $until,
             $occurrenceStart,
+            $event->getRecurrenceMonthWeekday(),
         );
     }
 }

@@ -42,6 +42,11 @@ class EventRecordTest extends TestCase
         self::assertSame('', (new EventRecord())->getLocation());
     }
 
+    public function testLinkDefaultsToEmpty(): void
+    {
+        self::assertSame('', (new EventRecord())->getLink());
+    }
+
     public function testStartDateDefaultsToNull(): void
     {
         self::assertNull((new EventRecord())->getStartDate());
@@ -112,6 +117,13 @@ class EventRecordTest extends TestCase
         $record = new EventRecord();
         $record->setLocation('Town Square');
         self::assertSame('Town Square', $record->getLocation());
+    }
+
+    public function testSetGetLink(): void
+    {
+        $record = new EventRecord();
+        $record->setLink('t3://page?uid=42');
+        self::assertSame('t3://page?uid=42', $record->getLink());
     }
 
     public function testSetGetStartDate(): void
@@ -257,11 +269,13 @@ class EventRecordTest extends TestCase
         $record = new EventRecord();
         $record->setRecurrenceFrequency('monthly');
         $record->setRecurrenceUntil(1_800_000_000);
+        $record->setRecurrenceMonthWeekday(2);
 
         self::assertSame('monthly', $record->getRecurrenceFrequency());
         self::assertTrue($record->isRecurring());
         self::assertSame(1_800_000_000, $record->getRecurrenceUntil());
         self::assertInstanceOf(\DateTimeImmutable::class, $record->getRecurrenceUntilAsDateTime());
+        self::assertSame(2, $record->getRecurrenceMonthWeekday());
     }
 
     // -------------------------------------------------------------------------

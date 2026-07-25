@@ -30,6 +30,9 @@
             <trans-unit id="calendar.allDay" resname="calendar.allDay">
                 <source>All day</source>
             </trans-unit>
+            <trans-unit id="calendar.popup.close" resname="calendar.popup.close">
+                <source>Close</source>
+            </trans-unit>
             <trans-unit id="weekday.monday" resname="weekday.monday">
                 <source>Monday</source>
             </trans-unit>

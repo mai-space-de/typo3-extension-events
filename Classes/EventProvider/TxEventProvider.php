@@ -9,6 +9,7 @@ use Maispace\MaiEvents\Service\RecurrenceExpander;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Frontend\Typolink\LinkFactory;
 
 class TxEventProvider implements EventProviderInterface
 {
@@ -40,8 +41,10 @@ class TxEventProvider implements EventProviderInterface
                 'tx_maievents_event.end_date',
                 'tx_maievents_event.description',
                 'tx_maievents_event.location',
+                'tx_maievents_event.link',
                 'tx_maievents_event.recurrence_frequency',
                 'tx_maievents_event.recurrence_until',
+                'tx_maievents_event.recurrence_month_weekday',
             )
             ->from('tx_maievents_event');
 
@@ -117,6 +120,7 @@ class TxEventProvider implements EventProviderInterface
             $until = $untilTs > 0
                 ? (new \DateTimeImmutable())->setTimestamp($untilTs)
                 : null;
+            $monthWeekday = (int) ($row['recurrence_month_weekday'] ?? 0);
 
             $occurrences = $this->recurrenceExpander->expand(
                 $seriesStart,
@@ -125,9 +129,11 @@ class TxEventProvider implements EventProviderInterface
                 $until,
                 $rangeStart,
                 $rangeEnd,
+                $monthWeekday,
             );
 
             $seriesUid = (int) $row['uid'];
+            $resolvedUrl = $this->resolveLink((string) ($row['link'] ?? ''));
             foreach ($occurrences as $occurrence) {
                 $occurrenceStart = $occurrence['start']->getTimestamp();
                 $events[] = new Event(
@@ -137,6 +143,7 @@ class TxEventProvider implements EventProviderInterface
                     end: $occurrence['end'],
                     description: (string) ($row['description'] ?? ''),
                     location: (string) $row['location'],
+                    url: $resolvedUrl,
                     source: 'tx_maievents',
                     seriesUid: $seriesUid,
                     occurrenceStart: $occurrenceStart,
@@ -150,5 +157,30 @@ class TxEventProvider implements EventProviderInterface
         );
 
         return $events;
+    }
+
+    /**
+     * Resolve a TCA link field value to a frontend URL.
+     * Plain http(s)/path values are returned as-is; typolink URNs go through LinkFactory.
+     */
+    protected function resolveLink(string $link): string
+    {
+        $link = trim($link);
+        if ($link === '') {
+            return '';
+        }
+
+        if (preg_match('#^(https?:)?//#i', $link) === 1 || str_starts_with($link, '/')) {
+            return $link;
+        }
+
+        try {
+            $linkFactory = GeneralUtility::makeInstance(LinkFactory::class);
+            $result = $linkFactory->createUri($link);
+
+            return $result->getUrl();
+        } catch (\Throwable) {
+            return '';
+        }
     }
 }

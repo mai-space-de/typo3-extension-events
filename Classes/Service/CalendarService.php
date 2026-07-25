@@ -12,14 +12,19 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 /**
  * Builds the calendar data structure shared by the Calendar FLUIDTEMPLATE
  * content element (via EventsDataProcessor) and the Extbase Events plugin
- * (via EventsController), so both surfaces support the same month/week/list
- * view modes and date navigation.
+ * (via EventsController) for the FullCalendar frontend mount.
  *
- * Supported view modes: month (default), week, list.
+ * Supported view modes: month (default), week, list — mapped to FullCalendar views.
  */
 final class CalendarService
 {
     private const ALLOWED_VIEW_MODES = ['month', 'week', 'list'];
+
+    private const VIEW_MODE_TO_FULLCALENDAR = [
+        'month' => 'dayGridMonth',
+        'week' => 'timeGridWeek',
+        'list' => 'listWeek',
+    ];
 
     /**
      * @param iterable<EventProviderInterface>|null $providers Explicit providers (mainly for tests);
@@ -30,14 +35,15 @@ final class CalendarService
     /**
      * @return array{
      *     viewMode: string,
+     *     initialView: string,
      *     currentDate: \DateTimeImmutable,
      *     start: \DateTimeImmutable,
      *     end: \DateTimeImmutable,
      *     events: Event[],
-     *     navigation: array{prev: \DateTimeImmutable, next: \DateTimeImmutable},
-     *     contentUid: int,
-     *     weeks?: array,
-     * }
+ *     fullCalendarEvents: list<array<string, mixed>>,
+ *     contentUid: int,
+ *     locale: string,
+ * }
      */
     public function buildCalendar(
         ?string $requestedViewMode,
@@ -48,31 +54,61 @@ final class CalendarService
         int $categoryUid = 0,
         int $contentUid = 0,
     ): array {
+        unset($listLimit); // retained for call-site BC / FlexForm; FC uses preload window
         $viewMode = $this->resolveViewMode($requestedViewMode, $configuredViewMode);
         $currentDate = $this->resolveCurrentDate($requestedDate, $configuredDate);
 
-        [$start, $end] = $this->calculateDateRange($viewMode, $currentDate);
+        // Preload a wide window so FullCalendar can navigate client-side without reloads.
+        [$start, $end] = $this->calculatePreloadRange($currentDate);
         $events = $this->aggregateEvents($start, $end, $categoryUid);
 
-        $calendar = [
+        return [
             'viewMode' => $viewMode,
+            'initialView' => self::VIEW_MODE_TO_FULLCALENDAR[$viewMode],
             'currentDate' => $currentDate,
             'start' => $start,
             'end' => $end,
             'events' => $events,
-            'navigation' => $this->buildNavigation($viewMode, $currentDate),
+            'fullCalendarEvents' => $this->mapToFullCalendarEvents($events),
             'contentUid' => $contentUid,
+            'locale' => 'de',
         ];
+    }
 
-        if ($viewMode === 'month') {
-            $calendar['weeks'] = $this->buildMonthGrid($currentDate, $events);
-        } elseif ($viewMode === 'week') {
-            $calendar['weeks'] = $this->buildWeekGrid($currentDate, $events);
-        } elseif ($viewMode === 'list') {
-            $calendar['events'] = array_slice($events, 0, $listLimit > 0 ? $listLimit : count($events));
+    /**
+     * @param Event[] $events
+     * @return list<array<string, mixed>>
+     */
+    public function mapToFullCalendarEvents(array $events): array
+    {
+        $mapped = [];
+        foreach ($events as $event) {
+            $mapped[] = [
+                'id' => $event->getUid(),
+                'title' => $event->getTitle(),
+                'start' => $event->getStart()->format('c'),
+                'end' => $event->getEnd()->format('c'),
+                'allDay' => $event->isAllDay(),
+                'url' => $event->getUrl(),
+                'extendedProps' => [
+                    'description' => $this->plainTextDescription($event->getDescription()),
+                    'location' => $event->getLocation(),
+                ],
+            ];
         }
 
-        return $calendar;
+        return $mapped;
+    }
+
+    private function plainTextDescription(string $description): string
+    {
+        if ($description === '') {
+            return '';
+        }
+
+        $stripped = html_entity_decode(strip_tags($description), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        return trim(preg_replace('/\s+/u', ' ', $stripped) ?? $stripped);
     }
 
     private function resolveViewMode(?string $requested, string $configured): string
@@ -108,28 +144,14 @@ final class CalendarService
     }
 
     /**
+     * Preload window: today −3 months … today +12 months (relative to currentDate).
+     *
      * @return array{\DateTimeImmutable, \DateTimeImmutable}
      */
-    private function calculateDateRange(string $viewMode, \DateTimeImmutable $currentDate): array
+    private function calculatePreloadRange(\DateTimeImmutable $currentDate): array
     {
-        switch ($viewMode) {
-            case 'week':
-                // ISO week: Monday to Sunday
-                $start = $currentDate->modify('Monday this week')->setTime(0, 0, 0);
-                $end = $start->modify('+6 days')->setTime(23, 59, 59);
-                break;
-
-            case 'list':
-                $start = $currentDate->setTime(0, 0, 0);
-                $end = $start->modify('+1 year')->setTime(23, 59, 59);
-                break;
-
-            case 'month':
-            default:
-                $start = $currentDate->modify('first day of this month')->setTime(0, 0, 0);
-                $end = $currentDate->modify('last day of this month')->setTime(23, 59, 59);
-                break;
-        }
+        $start = $currentDate->modify('-3 months')->modify('first day of this month')->setTime(0, 0, 0);
+        $end = $currentDate->modify('+12 months')->modify('last day of this month')->setTime(23, 59, 59);
 
         return [$start, $end];
     }
@@ -173,119 +195,5 @@ final class CalendarService
         } catch (\Throwable) {
             // Container unavailable or error — continue with empty result
         }
-    }
-
-    /**
-     * Builds a week-based grid for the entire month, including leading/trailing days
-     * from adjacent months to always produce full ISO weeks.
-     *
-     * Each week is an array of 7 day entries:
-     *   [date, isCurrentMonth, isToday, events]
-     *
-     * @param Event[] $events
-     */
-    private function buildMonthGrid(\DateTimeImmutable $currentDate, array $events): array
-    {
-        $firstOfMonth = $currentDate->modify('first day of this month')->setTime(0, 0, 0);
-        $lastOfMonth = $currentDate->modify('last day of this month')->setTime(0, 0, 0);
-
-        // Start grid on the Monday of the week containing the 1st of the month
-        $gridStart = $firstOfMonth->modify('Monday this week');
-        if ($gridStart > $firstOfMonth) {
-            $gridStart = $gridStart->modify('-7 days');
-        }
-
-        // End grid on the Sunday of the week containing the last day of the month
-        $gridEnd = $lastOfMonth->modify('Sunday this week');
-        if ($gridEnd < $lastOfMonth) {
-            $gridEnd = $gridEnd->modify('+7 days');
-        }
-
-        return $this->buildGrid($gridStart, $gridEnd, $firstOfMonth, $events);
-    }
-
-    /**
-     * Builds a grid for a single week (Monday to Sunday).
-     *
-     * @param Event[] $events
-     */
-    private function buildWeekGrid(\DateTimeImmutable $currentDate, array $events): array
-    {
-        $weekStart = $currentDate->modify('Monday this week')->setTime(0, 0, 0);
-        $weekEnd = $weekStart->modify('+6 days');
-
-        return $this->buildGrid($weekStart, $weekEnd, $currentDate, $events);
-    }
-
-    /**
-     * @param Event[] $events
-     */
-    private function buildGrid(
-        \DateTimeImmutable $gridStart,
-        \DateTimeImmutable $gridEnd,
-        \DateTimeImmutable $referenceMonth,
-        array $events,
-    ): array {
-        $today = new \DateTimeImmutable('today');
-        $weeks = [];
-        $week = [];
-        $day = $gridStart;
-
-        while ($day <= $gridEnd) {
-            $dayEnd = $day->setTime(23, 59, 59);
-            $dayEvents = array_values(array_filter(
-                $events,
-                static fn(Event $e) => $e->getStart() <= $dayEnd && $e->getEnd() >= $day,
-            ));
-
-            $week[] = [
-                'date' => $day,
-                'isCurrentMonth' => $day->format('Ym') === $referenceMonth->format('Ym'),
-                'isToday' => $day->format('Ymd') === $today->format('Ymd'),
-                'events' => $dayEvents,
-            ];
-
-            if (count($week) === 7) {
-                $weeks[] = $week;
-                $week = [];
-            }
-
-            $day = $day->modify('+1 day');
-        }
-
-        if ($week !== []) {
-            $weeks[] = $week;
-        }
-
-        return $weeks;
-    }
-
-    /**
-     * Builds previous/next navigation dates for the given view mode.
-     */
-    private function buildNavigation(string $viewMode, \DateTimeImmutable $currentDate): array
-    {
-        switch ($viewMode) {
-            case 'week':
-                $prev = $currentDate->modify('-1 week');
-                $next = $currentDate->modify('+1 week');
-                break;
-
-            case 'list':
-                $prev = $currentDate->modify('-1 month');
-                $next = $currentDate->modify('+1 month');
-                break;
-
-            case 'month':
-            default:
-                $prev = $currentDate->modify('first day of last month');
-                $next = $currentDate->modify('first day of next month');
-                break;
-        }
-
-        return [
-            'prev' => $prev,
-            'next' => $next,
-        ];
     }
 }

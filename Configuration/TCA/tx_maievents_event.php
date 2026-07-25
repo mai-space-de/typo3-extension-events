@@ -7,6 +7,7 @@ use Maispace\MaiBase\TableConfigurationArray\FieldConfig\CheckboxConfig;
 use Maispace\MaiBase\TableConfigurationArray\FieldConfig\DatetimeConfig;
 use Maispace\MaiBase\TableConfigurationArray\FieldConfig\FileConfig;
 use Maispace\MaiBase\TableConfigurationArray\FieldConfig\InputConfig;
+use Maispace\MaiBase\TableConfigurationArray\FieldConfig\LinkConfig;
 use Maispace\MaiBase\TableConfigurationArray\FieldConfig\NumberConfig;
 use Maispace\MaiBase\TableConfigurationArray\FieldConfig\SelectSingleConfig;
 use Maispace\MaiBase\TableConfigurationArray\FieldConfig\TextConfig;
@@ -38,6 +39,11 @@ return (new Table($lang('table.tx_maievents_event')))
         (new InputConfig())->setSize(50)->setMax(255)->setEval('trim')
     )
     ->addColumn(
+        'link',
+        $lang('tx_maievents_event.link'),
+        (new LinkConfig())->setAllowedTypes(['page', 'url', 'file'])
+    )
+    ->addColumn(
         'start_date',
         $lang('tx_maievents_event.start_date'),
         (new DatetimeConfig())->setFormat('datetime')->setRequired()
@@ -61,6 +67,7 @@ return (new Table($lang('table.tx_maievents_event')))
                 ['label' => $lang('tx_maievents_event.recurrence_frequency.daily'), 'value' => 'daily'],
                 ['label' => $lang('tx_maievents_event.recurrence_frequency.weekly'), 'value' => 'weekly'],
                 ['label' => $lang('tx_maievents_event.recurrence_frequency.monthly'), 'value' => 'monthly'],
+                ['label' => $lang('tx_maievents_event.recurrence_frequency.monthly_weekday'), 'value' => 'monthly_weekday'],
                 ['label' => $lang('tx_maievents_event.recurrence_frequency.yearly'), 'value' => 'yearly'],
             ])
             ->setDefault(''),
@@ -70,6 +77,21 @@ return (new Table($lang('table.tx_maievents_event')))
         '',
         '',
         'reload',
+    )
+    ->addColumn(
+        'recurrence_month_weekday',
+        $lang('tx_maievents_event.recurrence_month_weekday'),
+        (new SelectSingleConfig())
+            ->setItems([
+                ['label' => $lang('tx_maievents_event.recurrence_month_weekday.1'), 'value' => 1],
+                ['label' => $lang('tx_maievents_event.recurrence_month_weekday.2'), 'value' => 2],
+                ['label' => $lang('tx_maievents_event.recurrence_month_weekday.3'), 'value' => 3],
+                ['label' => $lang('tx_maievents_event.recurrence_month_weekday.4'), 'value' => 4],
+                ['label' => $lang('tx_maievents_event.recurrence_month_weekday.last'), 'value' => -1],
+            ])
+            ->setDefault(1),
+        '',
+        'FIELD:recurrence_frequency:=:monthly_weekday',
     )
     ->addColumn(
         'recurrence_until',
@@ -111,7 +133,7 @@ return (new Table($lang('table.tx_maievents_event')))
     ->addPalette(
         'recurrence',
         $lang('palette.recurrence'),
-        'recurrence_frequency, recurrence_until'
+        'recurrence_frequency, recurrence_month_weekday, recurrence_until'
     )
     ->addPalette(
         'registration',
@@ -120,7 +142,7 @@ return (new Table($lang('table.tx_maievents_event')))
     )
     ->addTypeShowItem(
         '0',
-        'title, description, location, image, categories,
+        'title, description, location, link, image, categories,
         --div--;' . $lang('tab.dates') . ', --palette--;;dates, --palette--;;recurrence,
         --div--;' . $lang('tab.registration') . ', --palette--;;registration,
         --div--;' . $lang('tab.language') . ', --palette--;;language,

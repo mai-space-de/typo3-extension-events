@@ -14,11 +14,13 @@ class EventRecord extends AbstractEntity
     protected string $title = '';
     protected string $description = '';
     protected string $location = '';
+    protected string $link = '';
     protected ?int $startDate = null;
     protected ?int $endDate = null;
     protected ?int $registrationDeadline = null;
     protected string $recurrenceFrequency = '';
     protected ?int $recurrenceUntil = null;
+    protected int $recurrenceMonthWeekday = 0;
     protected int $maxAttendees = 0;
     protected bool $hasWaitingList = false;
 
@@ -72,6 +74,16 @@ class EventRecord extends AbstractEntity
     public function setLocation(string $location): void
     {
         $this->location = $location;
+    }
+
+    public function getLink(): string
+    {
+        return $this->link;
+    }
+
+    public function setLink(string $link): void
+    {
+        $this->link = $link;
     }
 
     public function getStartDate(): ?int
@@ -152,6 +164,16 @@ class EventRecord extends AbstractEntity
         }
 
         return (new \DateTimeImmutable())->setTimestamp($this->recurrenceUntil);
+    }
+
+    public function getRecurrenceMonthWeekday(): int
+    {
+        return $this->recurrenceMonthWeekday;
+    }
+
+    public function setRecurrenceMonthWeekday(int $recurrenceMonthWeekday): void
+    {
+        $this->recurrenceMonthWeekday = $recurrenceMonthWeekday;
     }
 
     /**

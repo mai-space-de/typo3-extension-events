@@ -38,6 +38,10 @@
                 <source>All day</source>
                 <target>Ganztägig</target>
             </trans-unit>
+            <trans-unit id="calendar.popup.close" resname="calendar.popup.close">
+                <source>Close</source>
+                <target>Schließen</target>
+            </trans-unit>
             <trans-unit id="weekday.monday" resname="weekday.monday">
                 <source>Monday</source>
                 <target>Montag</target>

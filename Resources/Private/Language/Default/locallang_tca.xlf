@@ -21,6 +21,9 @@
             <trans-unit id="tx_maievents_event.location">
                 <source>Location</source>
             </trans-unit>
+            <trans-unit id="tx_maievents_event.link">
+                <source>Link</source>
+            </trans-unit>
             <trans-unit id="tx_maievents_event.start_date">
                 <source>Start Date</source>
             </trans-unit>
@@ -60,8 +63,29 @@
             <trans-unit id="tx_maievents_event.recurrence_frequency.monthly">
                 <source>Monthly</source>
             </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency.monthly_weekday">
+                <source>Monthly on weekday</source>
+            </trans-unit>
             <trans-unit id="tx_maievents_event.recurrence_frequency.yearly">
                 <source>Yearly</source>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_month_weekday">
+                <source>Which weekday in the month (weekday from start date)</source>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_month_weekday.1">
+                <source>First</source>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_month_weekday.2">
+                <source>Second</source>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_month_weekday.3">
+                <source>Third</source>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_month_weekday.4">
+                <source>Fourth</source>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_month_weekday.last">
+                <source>Last</source>
             </trans-unit>
             <trans-unit id="tx_maievents_event.recurrence_until">
                 <source>Repeat until (leave empty for no end)</source>

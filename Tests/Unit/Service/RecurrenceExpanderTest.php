@@ -170,4 +170,149 @@ final class RecurrenceExpanderTest extends TestCase
             $this->subject->isValidOccurrence($start, $end, 'weekly', $until, $occurrence->getTimestamp()),
         );
     }
+
+    #[Test]
+    public function expandMonthlyWeekdayReturnsSecondTuesdays(): void
+    {
+        // 2026-06-09 is the 2nd Tuesday of June 2026
+        $start = new \DateTimeImmutable('2026-06-09 18:00:00');
+        $end = new \DateTimeImmutable('2026-06-09 19:30:00');
+        $until = new \DateTimeImmutable('2026-09-30 23:59:59');
+        $rangeStart = new \DateTimeImmutable('2026-06-01 00:00:00');
+        $rangeEnd = new \DateTimeImmutable('2026-10-01 00:00:00');
+
+        $result = $this->subject->expand(
+            $start,
+            $end,
+            'monthly_weekday',
+            $until,
+            $rangeStart,
+            $rangeEnd,
+            2,
+        );
+
+        self::assertCount(4, $result);
+        self::assertSame('2026-06-09 18:00:00', $result[0]['start']->format('Y-m-d H:i:s'));
+        self::assertSame('2026-07-14 18:00:00', $result[1]['start']->format('Y-m-d H:i:s'));
+        self::assertSame('2026-08-11 18:00:00', $result[2]['start']->format('Y-m-d H:i:s'));
+        self::assertSame('2026-09-08 18:00:00', $result[3]['start']->format('Y-m-d H:i:s'));
+        self::assertSame('2026-06-09 19:30:00', $result[0]['end']->format('Y-m-d H:i:s'));
+    }
+
+    #[Test]
+    public function expandMonthlyWeekdayReturnsLastFridays(): void
+    {
+        // 2026-01-30 is the last Friday of January 2026
+        $start = new \DateTimeImmutable('2026-01-30 10:00:00');
+        $end = new \DateTimeImmutable('2026-01-30 11:00:00');
+        $until = new \DateTimeImmutable('2026-04-30 23:59:59');
+        $rangeStart = new \DateTimeImmutable('2026-01-01 00:00:00');
+        $rangeEnd = new \DateTimeImmutable('2026-05-01 00:00:00');
+
+        $result = $this->subject->expand(
+            $start,
+            $end,
+            'monthly_weekday',
+            $until,
+            $rangeStart,
+            $rangeEnd,
+            -1,
+        );
+
+        self::assertCount(4, $result);
+        self::assertSame('2026-01-30', $result[0]['start']->format('Y-m-d'));
+        self::assertSame('2026-02-27', $result[1]['start']->format('Y-m-d'));
+        self::assertSame('2026-03-27', $result[2]['start']->format('Y-m-d'));
+        self::assertSame('2026-04-24', $result[3]['start']->format('Y-m-d'));
+    }
+
+    #[Test]
+    public function expandMonthlyWeekdayRespectsRangeWindow(): void
+    {
+        // 2026-06-09 is the 2nd Tuesday; August window should only include 2026-08-11
+        $start = new \DateTimeImmutable('2026-06-09 18:00:00');
+        $end = new \DateTimeImmutable('2026-06-09 19:00:00');
+        $rangeStart = new \DateTimeImmutable('2026-08-01 00:00:00');
+        $rangeEnd = new \DateTimeImmutable('2026-09-01 00:00:00');
+
+        $result = $this->subject->expand(
+            $start,
+            $end,
+            'monthly_weekday',
+            null,
+            $rangeStart,
+            $rangeEnd,
+            2,
+        );
+
+        self::assertCount(1, $result);
+        self::assertSame('2026-08-11', $result[0]['start']->format('Y-m-d'));
+    }
+
+    #[Test]
+    public function expandMonthlyWeekdayRespectsUntil(): void
+    {
+        $start = new \DateTimeImmutable('2026-06-09 18:00:00');
+        $end = new \DateTimeImmutable('2026-06-09 19:00:00');
+        $until = new \DateTimeImmutable('2026-07-14 18:00:00');
+        $rangeStart = new \DateTimeImmutable('2026-06-01 00:00:00');
+        $rangeEnd = new \DateTimeImmutable('2026-12-01 00:00:00');
+
+        $result = $this->subject->expand(
+            $start,
+            $end,
+            'monthly_weekday',
+            $until,
+            $rangeStart,
+            $rangeEnd,
+            2,
+        );
+
+        self::assertCount(2, $result);
+        self::assertSame('2026-06-09', $result[0]['start']->format('Y-m-d'));
+        self::assertSame('2026-07-14', $result[1]['start']->format('Y-m-d'));
+    }
+
+    #[Test]
+    public function expandMonthlyWeekdayInfersIndexFromStartWhenUnset(): void
+    {
+        // 2026-06-09 is 2nd Tuesday — with monthWeekday=0 the expander infers 2
+        $start = new \DateTimeImmutable('2026-06-09 18:00:00');
+        $end = new \DateTimeImmutable('2026-06-09 19:00:00');
+        $rangeStart = new \DateTimeImmutable('2026-06-01 00:00:00');
+        $rangeEnd = new \DateTimeImmutable('2026-08-01 00:00:00');
+
+        $result = $this->subject->expand(
+            $start,
+            $end,
+            'monthly_weekday',
+            null,
+            $rangeStart,
+            $rangeEnd,
+            0,
+        );
+
+        self::assertCount(2, $result);
+        self::assertSame('2026-06-09', $result[0]['start']->format('Y-m-d'));
+        self::assertSame('2026-07-14', $result[1]['start']->format('Y-m-d'));
+    }
+
+    #[Test]
+    public function isValidOccurrenceAcceptsMonthlyWeekdayTimestamp(): void
+    {
+        $start = new \DateTimeImmutable('2026-06-09 18:00:00');
+        $end = new \DateTimeImmutable('2026-06-09 19:00:00');
+        $occurrence = new \DateTimeImmutable('2026-08-11 18:00:00');
+
+        self::assertTrue(
+            $this->subject->isValidOccurrence(
+                $start,
+                $end,
+                'monthly_weekday',
+                null,
+                $occurrence->getTimestamp(),
+                2,
+            ),
+        );
+    }
 }
