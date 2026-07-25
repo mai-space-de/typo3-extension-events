@@ -35,6 +35,7 @@ final class CalendarService
      *     end: \DateTimeImmutable,
      *     events: Event[],
      *     navigation: array{prev: \DateTimeImmutable, next: \DateTimeImmutable},
+     *     contentUid: int,
      *     weeks?: array,
      * }
      */
@@ -45,6 +46,7 @@ final class CalendarService
         string $configuredDate = '',
         int $listLimit = 10,
         int $categoryUid = 0,
+        int $contentUid = 0,
     ): array {
         $viewMode = $this->resolveViewMode($requestedViewMode, $configuredViewMode);
         $currentDate = $this->resolveCurrentDate($requestedDate, $configuredDate);
@@ -59,6 +61,7 @@ final class CalendarService
             'end' => $end,
             'events' => $events,
             'navigation' => $this->buildNavigation($viewMode, $currentDate),
+            'contentUid' => $contentUid,
         ];
 
         if ($viewMode === 'month') {

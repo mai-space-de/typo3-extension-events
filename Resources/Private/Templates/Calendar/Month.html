@@ -13,7 +13,7 @@
       {calendar.events}        Event[] – all events for the month
 </f:comment>
 
-<div class="mai-calendar mai-calendar--month">
+<div class="mai-calendar mai-calendar--month"{f:if(condition: calendar.contentUid, then: ' id="c{calendar.contentUid}"')}>
 
     <f:render partial="Calendar/Navigation" arguments="{calendar: calendar}" />
 

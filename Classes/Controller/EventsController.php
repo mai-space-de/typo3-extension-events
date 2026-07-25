@@ -38,6 +38,7 @@ class EventsController extends AbstractActionController
             configuredDate: '',
             listLimit: (int) ($this->settings['listLimit'] ?? 10),
             categoryUid: (int) ($this->settings['categoryUid'] ?? 0),
+            contentUid: (int) ($this->getContentObjectData()['uid'] ?? 0),
         );
 
         $this->view->assign('calendar', $calendar);

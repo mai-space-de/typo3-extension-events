@@ -3,7 +3,7 @@
     data-namespace-typo3-fluid="true"
 >
 
-<div class="mai-calendar mai-calendar--list">
+<div class="mai-calendar mai-calendar--list"{f:if(condition: calendar.contentUid, then: ' id="c{calendar.contentUid}"')}>
 
     <f:render partial="Calendar/Navigation" arguments="{calendar: calendar}" />
 

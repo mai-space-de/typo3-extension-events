@@ -10,6 +10,7 @@
 * Week view — seven-day view with event display
 * List view — chronological event list with configurable limit
 * Category filter — FlexForm `categoryUid` on Calendar View / List plugin (empty = all categories); filters via `sys_category_record_mm`
+* Scroll anchors — prev/next and view-mode links append `#c{uid}` and the calendar root uses `id="c{uid}"` so navigation keeps the viewport on the content element
 
 ## Export & Integration
 

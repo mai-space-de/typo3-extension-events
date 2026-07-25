@@ -282,4 +282,29 @@ class EventsDataProcessorTest extends TestCase
 
         $processor->process($cObj, [], ['viewMode' => 'list'], []);
     }
+
+    // -------------------------------------------------------------------------
+    // content uid (scroll anchor)
+    // -------------------------------------------------------------------------
+
+    public function testContentUidIsTakenFromContentObjectData(): void
+    {
+        $processor = $this->makeProcessor([]);
+        $cObj = $this->createMock(ContentObjectRenderer::class);
+        $cObj->data = ['uid' => 123];
+
+        $result = $processor->process($cObj, [], ['viewMode' => 'list'], []);
+
+        self::assertSame(123, $result['calendar']['contentUid']);
+    }
+
+    public function testContentUidDefaultsToZeroWhenUidIsAbsent(): void
+    {
+        $processor = $this->makeProcessor([]);
+        $cObj = $this->createMock(ContentObjectRenderer::class);
+
+        $result = $processor->process($cObj, [], ['viewMode' => 'list'], []);
+
+        self::assertSame(0, $result['calendar']['contentUid']);
+    }
 }

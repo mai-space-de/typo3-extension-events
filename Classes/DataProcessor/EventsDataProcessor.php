@@ -33,6 +33,7 @@ use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
  *   {calendar.events}        Event[]            – all events in range
  *   {calendar.weeks}         array[]            – only in month/week mode
  *   {calendar.navigation}    array              – prev/next navigation dates
+ *   {calendar.contentUid}    int                – tt_content uid for #c{uid} scroll anchors
  */
 class EventsDataProcessor implements DataProcessorInterface
 {
@@ -66,6 +67,7 @@ class EventsDataProcessor implements DataProcessorInterface
             configuredDate: (string) ($processorConfiguration['date'] ?? ''),
             listLimit: (int) ($processorConfiguration['listLimit'] ?? 10),
             categoryUid: (int) ($processorConfiguration['categoryUid'] ?? 0),
+            contentUid: (int) ($cObj->data['uid'] ?? 0),
         );
 
         return $processedData;

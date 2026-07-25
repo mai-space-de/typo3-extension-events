@@ -12,7 +12,7 @@
       {calendar.navigation}    array with 'prev' and 'next' DateTimeImmutable
 </f:comment>
 
-<div class="mai-calendar mai-calendar--week">
+<div class="mai-calendar mai-calendar--week"{f:if(condition: calendar.contentUid, then: ' id="c{calendar.contentUid}"')}>
 
     <f:render partial="Calendar/Navigation" arguments="{calendar: calendar}" />
 
