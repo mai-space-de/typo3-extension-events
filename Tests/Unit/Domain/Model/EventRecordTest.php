@@ -83,6 +83,12 @@ class EventRecordTest extends TestCase
         self::assertInstanceOf(ObjectStorage::class, (new EventRecord())->getImage());
     }
 
+    public function testCategoriesStorageIsInitialisedOnConstruction(): void
+    {
+        self::assertInstanceOf(ObjectStorage::class, (new EventRecord())->getCategories());
+        self::assertCount(0, (new EventRecord())->getCategories());
+    }
+
     // -------------------------------------------------------------------------
     // getter / setter round-trips
     // -------------------------------------------------------------------------
@@ -276,5 +282,20 @@ class EventRecordTest extends TestCase
         $a = new EventRecord();
         $b = new EventRecord();
         self::assertNotSame($a->getImage(), $b->getImage());
+    }
+
+    public function testTwoInstancesHaveIndependentCategoryStorages(): void
+    {
+        $a = new EventRecord();
+        $b = new EventRecord();
+        self::assertNotSame($a->getCategories(), $b->getCategories());
+    }
+
+    public function testSetGetCategories(): void
+    {
+        $record = new EventRecord();
+        $categories = new ObjectStorage();
+        $record->setCategories($categories);
+        self::assertSame($categories, $record->getCategories());
     }
 }

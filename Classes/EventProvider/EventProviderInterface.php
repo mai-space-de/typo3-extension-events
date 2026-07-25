@@ -23,7 +23,12 @@ interface EventProviderInterface
      *
      * @param \DateTimeInterface $start Inclusive start of the range
      * @param \DateTimeInterface $end   Inclusive end of the range
+     * @param int $categoryUid         Optional sys_category UID filter (0 = all)
      * @return Event[]
      */
-    public function getEvents(\DateTimeInterface $start, \DateTimeInterface $end): array;
+    public function getEvents(
+        \DateTimeInterface $start,
+        \DateTimeInterface $end,
+        int $categoryUid = 0,
+    ): array;
 }

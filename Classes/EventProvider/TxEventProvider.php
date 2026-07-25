@@ -16,8 +16,11 @@ class TxEventProvider implements EventProviderInterface
         private readonly RecurrenceExpander $recurrenceExpander = new RecurrenceExpander(),
     ) {}
 
-    public function getEvents(\DateTimeInterface $start, \DateTimeInterface $end): array
-    {
+    public function getEvents(
+        \DateTimeInterface $start,
+        \DateTimeInterface $end,
+        int $categoryUid = 0,
+    ): array {
         $rangeStartTs = $start->getTimestamp();
         $rangeEndTs = $end->getTimestamp();
 
@@ -29,38 +32,67 @@ class TxEventProvider implements EventProviderInterface
         // - first start before range end
         // - and either non-recurring with start in window, or recurring with until >= range start
         //   (until=0 treated as non-recurring fallback handled by expander)
-        $rows = $queryBuilder
+        $queryBuilder
             ->select(
-                'uid',
-                'title',
-                'start_date',
-                'end_date',
-                'description',
-                'location',
-                'recurrence_frequency',
-                'recurrence_until',
+                'tx_maievents_event.uid',
+                'tx_maievents_event.title',
+                'tx_maievents_event.start_date',
+                'tx_maievents_event.end_date',
+                'tx_maievents_event.description',
+                'tx_maievents_event.location',
+                'tx_maievents_event.recurrence_frequency',
+                'tx_maievents_event.recurrence_until',
             )
-            ->from('tx_maievents_event')
+            ->from('tx_maievents_event');
+
+        if ($categoryUid > 0) {
+            $queryBuilder
+                ->join(
+                    'tx_maievents_event',
+                    'sys_category_record_mm',
+                    'mm',
+                    (string) $queryBuilder->expr()->and(
+                        $queryBuilder->expr()->eq(
+                            'mm.uid_foreign',
+                            $queryBuilder->quoteIdentifier('tx_maievents_event.uid'),
+                        ),
+                        $queryBuilder->expr()->eq(
+                            'mm.uid_local',
+                            $queryBuilder->createNamedParameter($categoryUid, Connection::PARAM_INT),
+                        ),
+                        $queryBuilder->expr()->eq(
+                            'mm.tablenames',
+                            $queryBuilder->createNamedParameter('tx_maievents_event'),
+                        ),
+                        $queryBuilder->expr()->eq(
+                            'mm.fieldname',
+                            $queryBuilder->createNamedParameter('categories'),
+                        ),
+                    ),
+                );
+        }
+
+        $rows = $queryBuilder
             ->where(
-                $queryBuilder->expr()->lt('start_date', $queryBuilder->createNamedParameter($rangeEndTs, Connection::PARAM_INT)),
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter(27, Connection::PARAM_INT)),
-                $queryBuilder->expr()->eq('deleted', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
-                $queryBuilder->expr()->eq('hidden', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
+                $queryBuilder->expr()->lt('tx_maievents_event.start_date', $queryBuilder->createNamedParameter($rangeEndTs, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('tx_maievents_event.pid', $queryBuilder->createNamedParameter(27, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('tx_maievents_event.deleted', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('tx_maievents_event.hidden', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
                 $queryBuilder->expr()->or(
                     $queryBuilder->expr()->and(
-                        $queryBuilder->expr()->eq('recurrence_frequency', $queryBuilder->createNamedParameter('')),
-                        $queryBuilder->expr()->gte('start_date', $queryBuilder->createNamedParameter($rangeStartTs, Connection::PARAM_INT)),
+                        $queryBuilder->expr()->eq('tx_maievents_event.recurrence_frequency', $queryBuilder->createNamedParameter('')),
+                        $queryBuilder->expr()->gte('tx_maievents_event.start_date', $queryBuilder->createNamedParameter($rangeStartTs, Connection::PARAM_INT)),
                     ),
                     $queryBuilder->expr()->and(
-                        $queryBuilder->expr()->neq('recurrence_frequency', $queryBuilder->createNamedParameter('')),
+                        $queryBuilder->expr()->neq('tx_maievents_event.recurrence_frequency', $queryBuilder->createNamedParameter('')),
                         $queryBuilder->expr()->or(
-                            $queryBuilder->expr()->eq('recurrence_until', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
-                            $queryBuilder->expr()->gte('recurrence_until', $queryBuilder->createNamedParameter($rangeStartTs, Connection::PARAM_INT)),
+                            $queryBuilder->expr()->eq('tx_maievents_event.recurrence_until', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
+                            $queryBuilder->expr()->gte('tx_maievents_event.recurrence_until', $queryBuilder->createNamedParameter($rangeStartTs, Connection::PARAM_INT)),
                         ),
                     ),
                 ),
             )
-            ->orderBy('start_date', 'ASC')
+            ->orderBy('tx_maievents_event.start_date', 'ASC')
             ->executeQuery()
             ->fetchAllAssociative();
 

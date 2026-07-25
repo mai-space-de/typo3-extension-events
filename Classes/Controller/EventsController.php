@@ -34,9 +34,10 @@ class EventsController extends AbstractActionController
         $calendar = $this->calendarService->buildCalendar(
             requestedViewMode: $requestedViewMode,
             requestedDate: $requestedDate,
-            configuredViewMode: (string) ($this->settings['defaultViewMode'] ?? 'list'),
+            configuredViewMode: (string) ($this->settings['viewMode'] ?? $this->settings['defaultViewMode'] ?? 'month'),
             configuredDate: '',
             listLimit: (int) ($this->settings['listLimit'] ?? 10),
+            categoryUid: (int) ($this->settings['categoryUid'] ?? 0),
         );
 
         $this->view->assign('calendar', $calendar);
@@ -57,7 +58,11 @@ class EventsController extends AbstractActionController
             new \DateTimeImmutable('last day of this month midnight'),
         );
 
-        $events = $this->calendarService->aggregateEvents($start, $end);
+        $events = $this->calendarService->aggregateEvents(
+            $start,
+            $end,
+            (int) ($this->settings['categoryUid'] ?? 0),
+        );
         $icalContent = $this->iCalExportService->generate($events);
 
         return $this->fileDownloadResponse($icalContent, 'events.ics', 'text/calendar; charset=utf-8');

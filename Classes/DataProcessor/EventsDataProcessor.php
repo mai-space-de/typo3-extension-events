@@ -23,6 +23,7 @@ use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
  *   targetVariable  = calendar                 (default: calendar)
  *   date            = Y-m-d                    (default: today)
  *   listLimit       = 10                        (default: 10, only for list mode)
+ *   categoryUid     = 0                         (default: 0 = all categories)
  *
  * The processed variable structure passed to the template:
  *   {calendar.viewMode}      string
@@ -64,6 +65,7 @@ class EventsDataProcessor implements DataProcessorInterface
             configuredViewMode: (string) ($processorConfiguration['viewMode'] ?? 'month'),
             configuredDate: (string) ($processorConfiguration['date'] ?? ''),
             listLimit: (int) ($processorConfiguration['listLimit'] ?? 10),
+            categoryUid: (int) ($processorConfiguration['categoryUid'] ?? 0),
         );
 
         return $processedData;

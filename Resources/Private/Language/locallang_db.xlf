@@ -30,6 +30,9 @@
             <trans-unit id="flexform.settings.listLimit" resname="flexform.settings.listLimit">
                 <source>Maximum number of events (list mode)</source>
             </trans-unit>
+            <trans-unit id="flexform.settings.categoryUid" resname="flexform.settings.categoryUid">
+                <source>Category (empty = all categories)</source>
+            </trans-unit>
         </body>
     </file>
 </xliff>

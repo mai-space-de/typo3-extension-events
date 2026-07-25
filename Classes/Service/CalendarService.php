@@ -44,12 +44,13 @@ final class CalendarService
         string $configuredViewMode = 'month',
         string $configuredDate = '',
         int $listLimit = 10,
+        int $categoryUid = 0,
     ): array {
         $viewMode = $this->resolveViewMode($requestedViewMode, $configuredViewMode);
         $currentDate = $this->resolveCurrentDate($requestedDate, $configuredDate);
 
         [$start, $end] = $this->calculateDateRange($viewMode, $currentDate);
-        $events = $this->aggregateEvents($start, $end);
+        $events = $this->aggregateEvents($start, $end, $categoryUid);
 
         $calendar = [
             'viewMode' => $viewMode,
@@ -133,11 +134,14 @@ final class CalendarService
     /**
      * @return Event[]
      */
-    public function aggregateEvents(\DateTimeInterface $start, \DateTimeInterface $end): array
-    {
+    public function aggregateEvents(
+        \DateTimeInterface $start,
+        \DateTimeInterface $end,
+        int $categoryUid = 0,
+    ): array {
         $events = [];
         foreach ($this->getEventProviders() as $provider) {
-            foreach ($provider->getEvents($start, $end) as $event) {
+            foreach ($provider->getEvents($start, $end, $categoryUid) as $event) {
                 $events[] = $event;
             }
         }

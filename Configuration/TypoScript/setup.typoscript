@@ -18,6 +18,7 @@ plugin {
         }
         settings {
             defaultViewMode = {$plugin.tx_maievents.settings.defaultViewMode}
+            viewMode = {$plugin.tx_maievents.settings.defaultViewMode}
             listLimit = {$plugin.tx_maievents.settings.listLimit}
         }
     }
@@ -37,7 +38,8 @@ plugin {
             }
         }
         settings {
-            defaultViewMode = list
+            defaultViewMode = {$plugin.tx_maievents.settings.defaultViewMode}
+            viewMode = {$plugin.tx_maievents.settings.defaultViewMode}
             listLimit = {$plugin.tx_maievents.settings.listLimit}
         }
     }
@@ -56,6 +58,13 @@ plugin {
     }
 }
 
+# Shared FlexForm view-mode resolver (GET override applied separately via CASE key / PHP).
+lib.mai_events_flexformViewMode = TEXT
+lib.mai_events_flexformViewMode {
+    data = flexform:settings.viewMode
+    ifEmpty = month
+}
+
 # Content element: Events View
 # Wrapped as COA_INT so this block always re-renders per request — its output
 # depends on tx_maievents_view/tx_maievents_date GET parameters, which are
@@ -70,8 +79,10 @@ tt_content {
             file {
                 cObject = CASE
                 cObject {
-                    key.data = GP:tx_maievents_view
-                    key.ifEmpty = month
+                    key {
+                        data = GP:tx_maievents_view
+                        ifEmpty < lib.mai_events_flexformViewMode
+                    }
 
                     month = TEXT
                     month.value = EXT:mai_events/Resources/Private/Templates/Calendar/Month.html
@@ -82,8 +93,7 @@ tt_content {
                     list = TEXT
                     list.value = EXT:mai_events/Resources/Private/Templates/Calendar/List.html
 
-                    default = TEXT
-                    default.value = EXT:mai_events/Resources/Private/Templates/Calendar/Month.html
+                    default < .month
                 }
             }
             partialRootPaths {
@@ -96,15 +106,16 @@ tt_content {
                 10 = Maispace\MaiEvents\DataProcessor\EventsDataProcessor
                 10 {
                     targetVariable = calendar
-                    viewMode = TEXT
-                    viewMode {
-                        data = flexform:settings.viewMode
-                        ifEmpty = month
-                    }
+                    viewMode < lib.mai_events_flexformViewMode
                     listLimit = TEXT
                     listLimit {
                         data = flexform:settings.listLimit
                         ifEmpty = 10
+                    }
+                    categoryUid = TEXT
+                    categoryUid {
+                        data = flexform:settings.categoryUid
+                        ifEmpty = 0
                     }
                 }
             }

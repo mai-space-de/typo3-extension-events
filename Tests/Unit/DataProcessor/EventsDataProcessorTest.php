@@ -242,4 +242,44 @@ class EventsDataProcessorTest extends TestCase
 
         self::assertSame('existingValue', $result['existingKey']);
     }
+
+    // -------------------------------------------------------------------------
+    // category filter
+    // -------------------------------------------------------------------------
+
+    public function testCategoryUidIsPassedToProviders(): void
+    {
+        $provider = $this->createMock(EventProviderInterface::class);
+        $provider->expects(self::once())
+            ->method('getEvents')
+            ->with(
+                self::isInstanceOf(\DateTimeInterface::class),
+                self::isInstanceOf(\DateTimeInterface::class),
+                42,
+            )
+            ->willReturn([]);
+
+        $processor = $this->makeProcessor([$provider]);
+        $cObj = $this->createMock(ContentObjectRenderer::class);
+
+        $processor->process($cObj, [], ['viewMode' => 'list', 'categoryUid' => 42], []);
+    }
+
+    public function testCategoryUidDefaultsToZero(): void
+    {
+        $provider = $this->createMock(EventProviderInterface::class);
+        $provider->expects(self::once())
+            ->method('getEvents')
+            ->with(
+                self::isInstanceOf(\DateTimeInterface::class),
+                self::isInstanceOf(\DateTimeInterface::class),
+                0,
+            )
+            ->willReturn([]);
+
+        $processor = $this->makeProcessor([$provider]);
+        $cObj = $this->createMock(ContentObjectRenderer::class);
+
+        $processor->process($cObj, [], ['viewMode' => 'list'], []);
+    }
 }

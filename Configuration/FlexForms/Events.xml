@@ -42,6 +42,13 @@
                             </range>
                         </config>
                     </settings.listLimit>
+                    <settings.categoryUid>
+                        <label>LLL:EXT:mai_events/Resources/Private/Language/locallang_db.xlf:flexform.settings.categoryUid</label>
+                        <config>
+                            <type>category</type>
+                            <relationship>oneToOne</relationship>
+                        </config>
+                    </settings.categoryUid>
                 </el>
             </ROOT>
         </sDEF>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Maispace\MaiEvents\Domain\Model;
 
+use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -26,9 +27,21 @@ class EventRecord extends AbstractEntity
      */
     protected ObjectStorage $image;
 
+    /**
+     * @var ObjectStorage<Category>
+     */
+    protected ObjectStorage $categories;
+
     public function __construct()
     {
         $this->image = new ObjectStorage();
+        $this->categories = new ObjectStorage();
+    }
+
+    public function initializeObject(): void
+    {
+        $this->image = new ObjectStorage();
+        $this->categories = new ObjectStorage();
     }
 
     public function getTitle(): string
@@ -214,6 +227,22 @@ class EventRecord extends AbstractEntity
     public function setImage(ObjectStorage $image): void
     {
         $this->image = $image;
+    }
+
+    /**
+     * @return ObjectStorage<Category>
+     */
+    public function getCategories(): ObjectStorage
+    {
+        return $this->categories;
+    }
+
+    /**
+     * @param ObjectStorage<Category> $categories
+     */
+    public function setCategories(ObjectStorage $categories): void
+    {
+        $this->categories = $categories;
     }
 
     public function getFirstImage(): ?FileReference
