@@ -17,13 +17,13 @@ use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
  * Supported view modes (FlexForm / GET → FullCalendar initialView):
  *   - month  → dayGridMonth (default)
  *   - week   → timeGridWeek
- *   - list   → listWeek
+ *   - list   → listUpcoming (next N events; see listLimit)
  *
  * TypoScript / FlexForm options (all optional):
  *   viewMode        = month | week | list      (default: month)
  *   targetVariable  = calendar                 (default: calendar)
  *   date            = Y-m-d                    (default: today)
- *   listLimit       = 10                        (kept for FlexForm compat; unused by FC preload)
+ *   listLimit       = 10                        (max upcoming events in list view; clamped 1–100)
  *   categoryUid     = 0                         (default: 0 = all categories)
  *
  * The processed variable structure passed to the template:
@@ -35,6 +35,7 @@ use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
  *   {calendar.fullCalendarEvents}   array (JSON-serializable FC events)
  *   {calendar.contentUid}           int – tt_content uid for #c{uid}
  *   {calendar.locale}               string – FC locale (de, en, uk, ar, …)
+ *   {calendar.listLimit}            int – max upcoming events for listUpcoming
  */
 class EventsDataProcessor implements DataProcessorInterface
 {

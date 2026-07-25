@@ -6,7 +6,7 @@
  *
  * Markup contract (per mount):
  *   .mai-calendar[data-mai-calendar]
- *     data-initial-view, data-locale, data-initial-date (Y-m-d)
+ *     data-initial-view, data-locale, data-initial-date (Y-m-d), data-list-limit
  *     > script[type="application/json"].mai-calendar__events-json
  *     > .mai-calendar__mount
  *     > dialog.mai-calendar-popup
@@ -39,6 +39,13 @@
     var initialView = root.getAttribute('data-initial-view') || 'dayGridMonth';
     var locale = root.getAttribute('data-locale') || 'de';
     var initialDate = root.getAttribute('data-initial-date') || undefined;
+    var listLimit = parseInt(root.getAttribute('data-list-limit') || '10', 10);
+    if (isNaN(listLimit) || listLimit < 1) {
+      listLimit = 10;
+    }
+    if (listLimit > 100) {
+      listLimit = 100;
+    }
 
     var titleEl = dialog ? dialog.querySelector('.mai-calendar-popup__title') : null;
     var timeEl = dialog ? dialog.querySelector('.mai-calendar-popup__time') : null;
@@ -113,6 +120,46 @@
       }
     }
 
+    /**
+     * @returns {Date}
+     */
+    function startOfToday() {
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return today;
+    }
+
+    /**
+     * @param {string} viewType
+     * @returns {boolean}
+     */
+    function isListView(viewType) {
+      return typeof viewType === 'string' && viewType.indexOf('list') === 0;
+    }
+
+    /**
+     * @param {{ start?: Date }} info
+     * @param {string} viewType
+     * @returns {Array}
+     */
+    function resolveEventsForView(info, viewType) {
+      if (!isListView(viewType)) {
+        return events;
+      }
+
+      var rangeStart = info && info.start instanceof Date ? info.start : startOfToday();
+      var from = new Date(Math.max(rangeStart.getTime(), startOfToday().getTime()));
+
+      return events
+        .filter(function (event) {
+          var start = event && event.start ? new Date(event.start) : null;
+          return start instanceof Date && !isNaN(start.getTime()) && start >= from;
+        })
+        .slice(0, listLimit);
+    }
+
+    var activeViewType = initialView;
+
     var calendar = new window.FullCalendar.Calendar(mount, {
       initialView: initialView,
       initialDate: initialDate,
@@ -121,7 +168,14 @@
       headerToolbar: {
         left: 'prev,next today',
         center: 'title',
-        right: 'dayGridMonth,timeGridWeek,listWeek',
+        right: 'dayGridMonth,timeGridWeek,listUpcoming',
+      },
+      views: {
+        listUpcoming: {
+          type: 'list',
+          duration: { months: 12 },
+          buttonText: root.getAttribute('data-label-list') || 'List',
+        },
       },
       buttonText: {
         today: root.getAttribute('data-label-today') || 'Today',
@@ -129,7 +183,18 @@
         week: root.getAttribute('data-label-week') || 'Week',
         list: root.getAttribute('data-label-list') || 'List',
       },
-      events: events,
+      datesSet: function (info) {
+        if (info && info.view && info.view.type) {
+          activeViewType = info.view.type;
+        }
+      },
+      events: function (info, successCallback) {
+        var viewType = activeViewType;
+        if (calendar && calendar.view && calendar.view.type) {
+          viewType = calendar.view.type;
+        }
+        successCallback(resolveEventsForView(info, viewType));
+      },
       eventClick: function (info) {
         var url = info.event.url;
         if (url) {

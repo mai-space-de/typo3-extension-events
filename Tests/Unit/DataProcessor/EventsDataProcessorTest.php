@@ -103,7 +103,25 @@ class EventsDataProcessorTest extends TestCase
         self::assertSame('timeGridWeek', $week['calendar']['initialView']);
 
         $list = $processor->process($cObj, [], ['viewMode' => 'list'], []);
-        self::assertSame('listWeek', $list['calendar']['initialView']);
+        self::assertSame('listUpcoming', $list['calendar']['initialView']);
+    }
+
+    public function testListLimitIsPassedThroughAndClamped(): void
+    {
+        $processor = $this->makeProcessor([]);
+        $cObj = $this->makeContentObject();
+
+        $default = $processor->process($cObj, [], ['viewMode' => 'list'], []);
+        self::assertSame(10, $default['calendar']['listLimit']);
+
+        $custom = $processor->process($cObj, [], ['viewMode' => 'list', 'listLimit' => '3'], []);
+        self::assertSame(3, $custom['calendar']['listLimit']);
+
+        $tooLow = $processor->process($cObj, [], ['viewMode' => 'list', 'listLimit' => '0'], []);
+        self::assertSame(1, $tooLow['calendar']['listLimit']);
+
+        $tooHigh = $processor->process($cObj, [], ['viewMode' => 'list', 'listLimit' => '999'], []);
+        self::assertSame(100, $tooHigh['calendar']['listLimit']);
     }
 
     public function testBuildsFullCalendarEventsPayload(): void

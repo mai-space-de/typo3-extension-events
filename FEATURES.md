@@ -6,8 +6,9 @@
 
 ## Calendar Views
 
-* FullCalendar UI — vendored FullCalendar 6 (dayGridMonth / timeGridWeek / listWeek) with client-side toolbar navigation; mobile-friendly
-* Initial view — FlexForm / GET `viewMode` maps to FullCalendar (`month`→`dayGridMonth`, `week`→`timeGridWeek`, `list`→`listWeek`)
+* FullCalendar UI — vendored FullCalendar 6 (dayGridMonth / timeGridWeek / listUpcoming) with client-side toolbar navigation; mobile-friendly
+* Initial view — FlexForm / GET `viewMode` maps to FullCalendar (`month`→`dayGridMonth`, `week`→`timeGridWeek`, `list`→`listUpcoming`)
+* List limit — FlexForm `listLimit` (1–100, default 10) caps how many upcoming events the list view shows (next N from today); month/week still use the full preload set
 * Event link — optional TCA `link` resolved to a frontend URL; click navigates when set
 * Info popup — events without a link open a native `<dialog>` with title, time, location, and plain-text description
 * Category filter — FlexForm `categoryUid` on Calendar View / List plugin (empty = all categories); filters via `sys_category_record_mm`
@@ -18,8 +19,8 @@
 
 * iCal export — export events as RFC 5545-compliant `.ics` files via `EventsController` (expanded occurrences in the export window; respects category filter)
 * EventProviderInterface — pluggable data source aggregation; implement `Maispace\MaiEvents\EventProvider\EventProviderInterface` to contribute events from other extensions
-* EventsDataProcessor — builds FullCalendar payload (`fullCalendarEvents`, `initialView`, `locale`, `contentUid`) for Fluid mounts
-* FlexForm settings — view mode (month / week / list), list limit (compat), and category filter configurable per content element
+* EventsDataProcessor — builds FullCalendar payload (`fullCalendarEvents`, `initialView`, `locale`, `contentUid`, `listLimit`) for Fluid mounts
+* FlexForm settings — view mode (month / week / list), list limit (upcoming events in list mode), and category filter configurable per content element
 
 ## Event Registration
 

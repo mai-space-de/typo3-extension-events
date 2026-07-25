@@ -23,8 +23,11 @@ final class CalendarService
     private const VIEW_MODE_TO_FULLCALENDAR = [
         'month' => 'dayGridMonth',
         'week' => 'timeGridWeek',
-        'list' => 'listWeek',
+        'list' => 'listUpcoming',
     ];
+
+    private const LIST_LIMIT_MIN = 1;
+    private const LIST_LIMIT_MAX = 100;
 
     /**
      * @param iterable<EventProviderInterface>|null $providers Explicit providers (mainly for tests);
@@ -40,10 +43,11 @@ final class CalendarService
      *     start: \DateTimeImmutable,
      *     end: \DateTimeImmutable,
      *     events: Event[],
- *     fullCalendarEvents: list<array<string, mixed>>,
- *     contentUid: int,
- *     locale: string,
- * }
+     *     fullCalendarEvents: list<array<string, mixed>>,
+     *     contentUid: int,
+     *     locale: string,
+     *     listLimit: int,
+     * }
      */
     public function buildCalendar(
         ?string $requestedViewMode,
@@ -54,9 +58,9 @@ final class CalendarService
         int $categoryUid = 0,
         int $contentUid = 0,
     ): array {
-        unset($listLimit); // retained for call-site BC / FlexForm; FC uses preload window
         $viewMode = $this->resolveViewMode($requestedViewMode, $configuredViewMode);
         $currentDate = $this->resolveCurrentDate($requestedDate, $configuredDate);
+        $listLimit = $this->clampListLimit($listLimit);
 
         // Preload a wide window so FullCalendar can navigate client-side without reloads.
         [$start, $end] = $this->calculatePreloadRange($currentDate);
@@ -72,7 +76,13 @@ final class CalendarService
             'fullCalendarEvents' => $this->mapToFullCalendarEvents($events),
             'contentUid' => $contentUid,
             'locale' => 'de',
+            'listLimit' => $listLimit,
         ];
+    }
+
+    public function clampListLimit(int $listLimit): int
+    {
+        return max(self::LIST_LIMIT_MIN, min($listLimit, self::LIST_LIMIT_MAX));
     }
 
     /**
