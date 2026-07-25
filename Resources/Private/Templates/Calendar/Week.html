@@ -44,7 +44,7 @@
                                 <ul class="mai-calendar__events" role="list">
                                     <f:for each="{day.events}" as="event">
                                         <li class="mai-calendar__event-item">
-                                            <f:render partial="Calendar/Event" arguments="{event: event, compact: 0}" />
+                                            <f:render partial="Calendar/Event" arguments="{event: event, compact: 1}" />
                                         </li>
                                     </f:for>
                                 </ul>
