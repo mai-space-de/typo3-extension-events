@@ -8,6 +8,7 @@ use Maispace\MaiEvents\Domain\Model\Event;
 use Maispace\MaiEvents\EventProvider\EventProviderInterface;
 use Maispace\MaiEvents\EventProvider\TxEventProvider;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Frontend\Typolink\LinkFactory;
 
 /**
  * Builds the calendar data structure shared by the Calendar FLUIDTEMPLATE
@@ -28,6 +29,25 @@ final class CalendarService
 
     private const LIST_LIMIT_MIN = 1;
     private const LIST_LIMIT_MAX = 100;
+
+    /**
+     * RTE tags kept in the info-popup description (links resolved separately).
+     *
+     * @var list<string>
+     */
+    private const DESCRIPTION_ALLOWED_TAGS = [
+        'p', 'br', 'strong', 'b', 'em', 'i', 'u',
+        'ul', 'ol', 'li', 'a', 'h3', 'h4', 'blockquote',
+    ];
+
+    /**
+     * Tags that must be removed entirely (not unwrapped) to avoid leaking their contents.
+     *
+     * @var list<string>
+     */
+    private const DESCRIPTION_REMOVED_TAGS = [
+        'script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'button', 'textarea',
+    ];
 
     /**
      * @param iterable<EventProviderInterface>|null $providers Explicit providers (mainly for tests);
@@ -101,7 +121,7 @@ final class CalendarService
                 'allDay' => $event->isAllDay(),
                 'url' => $event->getUrl(),
                 'extendedProps' => [
-                    'description' => $this->plainTextDescription($event->getDescription()),
+                    'description' => $this->formatDescriptionHtml($event->getDescription()),
                     'location' => $event->getLocation(),
                 ],
             ];
@@ -110,15 +130,169 @@ final class CalendarService
         return $mapped;
     }
 
-    private function plainTextDescription(string $description): string
+    /**
+     * Keep safe RTE markup (including <a>) for the calendar info popup.
+     * Typolink / t3:// hrefs are resolved to frontend URLs; unsafe schemes are dropped.
+     */
+    private function formatDescriptionHtml(string $description): string
     {
+        $description = trim($description);
         if ($description === '') {
             return '';
         }
 
-        $stripped = html_entity_decode(strip_tags($description), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $document = new \DOMDocument('1.0', 'UTF-8');
+        $previous = libxml_use_internal_errors(true);
+        $loaded = $document->loadHTML(
+            '<?xml encoding="UTF-8"><div id="mai-cal-desc-root">' . $description . '</div>',
+            LIBXML_HTML_NODEFDTD,
+        );
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
 
-        return trim(preg_replace('/\s+/u', ' ', $stripped) ?? $stripped);
+        if ($loaded !== true) {
+            return htmlspecialchars(strip_tags($description), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        }
+
+        $root = $document->getElementById('mai-cal-desc-root');
+        if (!$root instanceof \DOMElement) {
+            return '';
+        }
+
+        $this->sanitizeDescriptionNode($root);
+
+        $html = '';
+        foreach (iterator_to_array($root->childNodes) as $child) {
+            $html .= $document->saveHTML($child);
+        }
+
+        return trim($html);
+    }
+
+    private function sanitizeDescriptionNode(\DOMNode $node): void
+    {
+        if (!$node->hasChildNodes()) {
+            return;
+        }
+
+        /** @var list<\DOMNode> $children */
+        $children = iterator_to_array($node->childNodes);
+        foreach ($children as $child) {
+            if ($child instanceof \DOMText) {
+                continue;
+            }
+
+            if (!$child instanceof \DOMElement) {
+                $child->parentNode?->removeChild($child);
+                continue;
+            }
+
+            $tag = strtolower($child->tagName);
+            if (in_array($tag, self::DESCRIPTION_REMOVED_TAGS, true)) {
+                $child->parentNode?->removeChild($child);
+                continue;
+            }
+
+            if (!in_array($tag, self::DESCRIPTION_ALLOWED_TAGS, true)) {
+                $this->sanitizeDescriptionNode($child);
+                $this->unwrapElement($child);
+                continue;
+            }
+
+            if ($tag === 'a') {
+                $this->sanitizeDescriptionAnchor($child);
+            } else {
+                $this->stripElementAttributes($child);
+            }
+
+            $this->sanitizeDescriptionNode($child);
+        }
+    }
+
+    private function sanitizeDescriptionAnchor(\DOMElement $anchor): void
+    {
+        $href = trim(html_entity_decode($anchor->getAttribute('href'), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        $resolved = $this->resolveDescriptionHref($href);
+
+        $this->stripElementAttributes($anchor);
+
+        if ($resolved === '' || !$this->isSafeDescriptionHref($resolved)) {
+            $this->unwrapElement($anchor);
+
+            return;
+        }
+
+        $anchor->setAttribute('href', $resolved);
+        if (preg_match('#^https?:#i', $resolved) === 1) {
+            $anchor->setAttribute('target', '_blank');
+            $anchor->setAttribute('rel', 'noopener noreferrer');
+        }
+    }
+
+    private function resolveDescriptionHref(string $href): string
+    {
+        if ($href === '' || str_starts_with($href, '#')) {
+            return $href;
+        }
+
+        if (
+            preg_match('#^(https?:)?//#i', $href) === 1
+            || str_starts_with($href, '/')
+            || str_starts_with($href, 'mailto:')
+            || str_starts_with($href, 'tel:')
+        ) {
+            return $href;
+        }
+
+        try {
+            $linkFactory = GeneralUtility::makeInstance(LinkFactory::class);
+            $result = $linkFactory->createUri($href);
+
+            return $result->getUrl();
+        } catch (\Throwable) {
+            return '';
+        }
+    }
+
+    private function isSafeDescriptionHref(string $href): bool
+    {
+        if ($href === '' || str_starts_with($href, '#')) {
+            return true;
+        }
+
+        $lower = strtolower($href);
+        foreach (['javascript:', 'data:', 'vbscript:'] as $dangerous) {
+            if (str_starts_with($lower, $dangerous)) {
+                return false;
+            }
+        }
+
+        return preg_match('~^(https?:|mailto:|tel:|/|#)~i', $href) === 1;
+    }
+
+    private function stripElementAttributes(\DOMElement $element): void
+    {
+        /** @var list<string> $names */
+        $names = [];
+        foreach ($element->attributes ?? [] as $attribute) {
+            $names[] = $attribute->name;
+        }
+        foreach ($names as $name) {
+            $element->removeAttribute($name);
+        }
+    }
+
+    private function unwrapElement(\DOMElement $element): void
+    {
+        $parent = $element->parentNode;
+        if ($parent === null) {
+            return;
+        }
+
+        while ($element->firstChild !== null) {
+            $parent->insertBefore($element->firstChild, $element);
+        }
+        $parent->removeChild($element);
     }
 
     private function resolveViewMode(?string $requested, string $configured): string

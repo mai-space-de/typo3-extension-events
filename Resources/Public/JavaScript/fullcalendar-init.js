@@ -89,7 +89,7 @@
       }
       if (descriptionEl) {
         var description = (event.extendedProps && event.extendedProps.description) || '';
-        descriptionEl.textContent = description;
+        descriptionEl.innerHTML = description;
         descriptionEl.hidden = description === '';
       }
       dialog.showModal();

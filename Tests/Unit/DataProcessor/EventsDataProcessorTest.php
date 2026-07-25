@@ -132,7 +132,7 @@ class EventsDataProcessorTest extends TestCase
             '2024-06-15 10:00',
             '2024-06-15 11:00',
             url: 'https://example.org/event',
-            description: '<p>Hello <strong>world</strong></p>',
+            description: '<p>Hello <strong>world</strong> — <a href="https://example.org/more">more</a></p>',
             location: 'Hall A',
         );
 
@@ -152,9 +152,37 @@ class EventsDataProcessorTest extends TestCase
         self::assertSame('Test', $fcEvent['title']);
         self::assertSame('https://example.org/event', $fcEvent['url']);
         self::assertSame('Hall A', $fcEvent['extendedProps']['location']);
-        self::assertSame('Hello world', $fcEvent['extendedProps']['description']);
+        self::assertSame(
+            '<p>Hello <strong>world</strong> — <a href="https://example.org/more" target="_blank" rel="noopener noreferrer">more</a></p>',
+            $fcEvent['extendedProps']['description'],
+        );
         self::assertArrayNotHasKey('weeks', $result['calendar']);
         self::assertArrayNotHasKey('navigation', $result['calendar']);
+    }
+
+    public function testDescriptionHtmlDropsUnsafeTagsAndSchemes(): void
+    {
+        $event = $this->makeEvent(
+            '2',
+            'Unsafe',
+            '2024-06-15 10:00',
+            '2024-06-15 11:00',
+            description: '<p>Click <a href="javascript:alert(1)">here</a><script>x()</script></p>',
+        );
+
+        $provider = $this->createMock(EventProviderInterface::class);
+        $provider->method('getEvents')->willReturn([$event]);
+
+        $processor = $this->makeProcessor([$provider]);
+        $_GET['tx_maievents_date'] = '2024-06-01';
+        $result = $processor->process($this->makeContentObject(), [], ['viewMode' => 'month'], []);
+        unset($_GET['tx_maievents_date']);
+
+        $description = $result['calendar']['fullCalendarEvents'][0]['extendedProps']['description'];
+        self::assertStringNotContainsString('<script', $description);
+        self::assertStringNotContainsString('javascript:', $description);
+        self::assertStringContainsString('Click here', strip_tags($description));
+        self::assertStringNotContainsString('<a ', $description);
     }
 
     public function testPreloadRangeSpansMinusThreeToPlusTwelveMonths(): void
