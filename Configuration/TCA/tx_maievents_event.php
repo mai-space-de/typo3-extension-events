@@ -8,6 +8,7 @@ use Maispace\MaiBase\TableConfigurationArray\FieldConfig\DatetimeConfig;
 use Maispace\MaiBase\TableConfigurationArray\FieldConfig\FileConfig;
 use Maispace\MaiBase\TableConfigurationArray\FieldConfig\InputConfig;
 use Maispace\MaiBase\TableConfigurationArray\FieldConfig\NumberConfig;
+use Maispace\MaiBase\TableConfigurationArray\FieldConfig\SelectSingleConfig;
 use Maispace\MaiBase\TableConfigurationArray\FieldConfig\TextConfig;
 use Maispace\MaiBase\TableConfigurationArray\Helper;
 use Maispace\MaiBase\TableConfigurationArray\Table;
@@ -52,6 +53,32 @@ return (new Table($lang('table.tx_maievents_event')))
         (new DatetimeConfig())->setFormat('datetime')
     )
     ->addColumn(
+        'recurrence_frequency',
+        $lang('tx_maievents_event.recurrence_frequency'),
+        (new SelectSingleConfig())
+            ->setItems([
+                ['label' => $lang('tx_maievents_event.recurrence_frequency.none'), 'value' => ''],
+                ['label' => $lang('tx_maievents_event.recurrence_frequency.daily'), 'value' => 'daily'],
+                ['label' => $lang('tx_maievents_event.recurrence_frequency.weekly'), 'value' => 'weekly'],
+                ['label' => $lang('tx_maievents_event.recurrence_frequency.monthly'), 'value' => 'monthly'],
+                ['label' => $lang('tx_maievents_event.recurrence_frequency.yearly'), 'value' => 'yearly'],
+            ])
+            ->setDefault(''),
+        '',
+        '',
+        false,
+        '',
+        '',
+        'reload',
+    )
+    ->addColumn(
+        'recurrence_until',
+        $lang('tx_maievents_event.recurrence_until'),
+        (new DatetimeConfig())->setFormat('datetime'),
+        '',
+        'FIELD:recurrence_frequency:!=:',
+    )
+    ->addColumn(
         'max_attendees',
         $lang('tx_maievents_event.max_attendees'),
         (new NumberConfig())->setFormat('integer')->setDefault(0)
@@ -82,6 +109,11 @@ return (new Table($lang('table.tx_maievents_event')))
         'start_date, end_date, registration_deadline'
     )
     ->addPalette(
+        'recurrence',
+        $lang('palette.recurrence'),
+        'recurrence_frequency, recurrence_until'
+    )
+    ->addPalette(
         'registration',
         $lang('palette.registration'),
         'max_attendees, has_waiting_list'
@@ -89,7 +121,7 @@ return (new Table($lang('table.tx_maievents_event')))
     ->addTypeShowItem(
         '0',
         'title, description, location, image, categories,
-        --div--;' . $lang('tab.dates') . ', --palette--;;dates,
+        --div--;' . $lang('tab.dates') . ', --palette--;;dates, --palette--;;recurrence,
         --div--;' . $lang('tab.registration') . ', --palette--;;registration,
         --div--;' . $lang('tab.language') . ', --palette--;;language,
         --div--;' . $lang('tab.access') . ', --palette--;;hidden, --palette--;;access'

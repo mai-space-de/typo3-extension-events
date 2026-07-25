@@ -67,6 +67,17 @@ class EventRecordTest extends TestCase
         self::assertFalse((new EventRecord())->isHasWaitingList());
     }
 
+    public function testRecurrenceFrequencyDefaultsToEmpty(): void
+    {
+        self::assertSame('', (new EventRecord())->getRecurrenceFrequency());
+        self::assertFalse((new EventRecord())->isRecurring());
+    }
+
+    public function testRecurrenceUntilDefaultsToNull(): void
+    {
+        self::assertNull((new EventRecord())->getRecurrenceUntil());
+    }
+
     public function testImageStorageIsInitialisedOnConstruction(): void
     {
         self::assertInstanceOf(ObjectStorage::class, (new EventRecord())->getImage());
@@ -216,6 +227,35 @@ class EventRecordTest extends TestCase
         $record = new EventRecord();
         $record->setRegistrationDeadline(time() - 86400); // yesterday
         self::assertFalse($record->isRegistrationOpen());
+    }
+
+    public function testRelativeDeadlineAppliesOffsetToOccurrence(): void
+    {
+        $record = new EventRecord();
+        $now = time();
+        $seriesStart = $now + 86400 * 14;
+        $deadline = $seriesStart - 86400 * 7;
+        $occurrence = $seriesStart + 86400 * 7;
+
+        $record->setStartDate($seriesStart);
+        $record->setRegistrationDeadline($deadline);
+        $record->setRecurrenceFrequency('weekly');
+
+        $expected = $occurrence - ($seriesStart - $deadline);
+        self::assertSame($expected, $record->getRegistrationDeadlineForOccurrence($occurrence));
+        self::assertTrue($record->isRegistrationOpenForOccurrence($occurrence));
+    }
+
+    public function testSetGetRecurrenceFields(): void
+    {
+        $record = new EventRecord();
+        $record->setRecurrenceFrequency('monthly');
+        $record->setRecurrenceUntil(1_800_000_000);
+
+        self::assertSame('monthly', $record->getRecurrenceFrequency());
+        self::assertTrue($record->isRecurring());
+        self::assertSame(1_800_000_000, $record->getRecurrenceUntil());
+        self::assertInstanceOf(\DateTimeImmutable::class, $record->getRecurrenceUntilAsDateTime());
     }
 
     // -------------------------------------------------------------------------

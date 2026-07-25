@@ -8,6 +8,13 @@
         <div class="mai-registration">
             <h2><f:translate key="registration.form.headline" extensionName="mai_events" /></h2>
 
+            <f:if condition="{occurrenceStart}">
+                <p class="mai-registration__occurrence">
+                    <f:translate key="registration.occurrence" extensionName="mai_events" />:
+                    <f:format.date format="d.m.Y H:i" date="{occurrenceStart}" />
+                </p>
+            </f:if>
+
             <f:form.validationResults>
                 <f:if condition="{validationResults.flattenedErrors}">
                     <div class="mai-registration__errors" role="alert">
@@ -23,6 +30,7 @@
             <f:form action="register" controller="Registration" extensionName="MaiEvents" pluginName="Registration"
                     method="post" additionalAttributes="{novalidate: 'novalidate'}">
                 <f:form.hidden name="eventUid" value="{event.uid}" />
+                <f:form.hidden name="occurrenceStart" value="{occurrenceStart}" />
 
                 <div class="mai-registration__field">
                     <label for="firstName"><f:translate key="registration.firstName" extensionName="mai_events" /></label>

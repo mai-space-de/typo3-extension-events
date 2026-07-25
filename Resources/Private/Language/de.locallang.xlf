@@ -98,6 +98,14 @@
                 <source>Registration for this event is closed.</source>
                 <target>Die Anmeldung für diese Veranstaltung ist geschlossen.</target>
             </trans-unit>
+            <trans-unit id="registration.occurrence" resname="registration.occurrence">
+                <source>Date</source>
+                <target>Termin</target>
+            </trans-unit>
+            <trans-unit id="registration.occurrenceInvalid" resname="registration.occurrenceInvalid">
+                <source>This event occurrence is not valid.</source>
+                <target>Dieser Veranstaltungstermin ist ungültig.</target>
+            </trans-unit>
             <trans-unit id="registration.success.headline" resname="registration.success.headline">
                 <source>Registration received</source>
                 <target>Anmeldung eingegangen</target>
@@ -145,6 +153,10 @@
             <trans-unit id="backend.registration.registeredAt" resname="backend.registration.registeredAt">
                 <source>Registered at</source>
                 <target>Angemeldet am</target>
+            </trans-unit>
+            <trans-unit id="backend.registration.occurrence" resname="backend.registration.occurrence">
+                <source>Occurrence</source>
+                <target>Termin</target>
             </trans-unit>
             <trans-unit id="backend.registration.noRegistrations" resname="backend.registration.noRegistrations">
                 <source>No registrations found for this event.</source>

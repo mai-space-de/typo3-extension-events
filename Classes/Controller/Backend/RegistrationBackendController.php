@@ -60,7 +60,7 @@ class RegistrationBackendController extends AbstractBackendController
         }
 
         $registrations = $this->registrationRepository->findByEvent($eventUid);
-        $rows = [['first_name', 'last_name', 'email', 'status', 'waiting_list', 'registered_at', 'confirmed_at']];
+        $rows = [['first_name', 'last_name', 'email', 'status', 'waiting_list', 'occurrence_start', 'registered_at', 'confirmed_at']];
 
         foreach ($registrations as $registration) {
             $rows[] = [
@@ -69,6 +69,9 @@ class RegistrationBackendController extends AbstractBackendController
                 $registration->getEmail(),
                 $registration->getStatus(),
                 $registration->isWaitingList() ? '1' : '0',
+                $registration->getOccurrenceStart() > 0
+                    ? date('Y-m-d H:i:s', $registration->getOccurrenceStart())
+                    : '',
                 $registration->getRegisteredAt() ? date('Y-m-d H:i:s', $registration->getRegisteredAt()) : '',
                 $registration->getConfirmedAt() ? date('Y-m-d H:i:s', $registration->getConfirmedAt()) : '',
             ];

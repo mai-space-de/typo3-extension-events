@@ -39,6 +39,33 @@ class RegistrationRepository extends Repository
         return $query->count();
     }
 
+    public function countByEventAndOccurrence(int $eventUid, int $occurrenceStart): int
+    {
+        $query = $this->createQuery();
+        $query->matching(
+            $query->logicalAnd(
+                $query->equals('event', $eventUid),
+                $query->equals('occurrenceStart', $occurrenceStart),
+                $query->logicalNot($query->equals('status', 'cancelled')),
+            ),
+        );
+
+        return $query->count();
+    }
+
+    public function findByEventAndOccurrence(int $eventUid, int $occurrenceStart): QueryResultInterface
+    {
+        $query = $this->createQuery();
+        $query->matching(
+            $query->logicalAnd(
+                $query->equals('event', $eventUid),
+                $query->equals('occurrenceStart', $occurrenceStart),
+            ),
+        );
+
+        return $query->execute();
+    }
+
     public function findWaitingByEvent(int $eventUid): QueryResultInterface
     {
         $query = $this->createQuery();

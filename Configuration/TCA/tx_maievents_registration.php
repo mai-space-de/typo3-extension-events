@@ -28,6 +28,11 @@ return (new Table($lang('table.tx_maievents_registration')))
             ->setMaxItems(1)
     )
     ->addColumn(
+        'occurrence_start',
+        $lang('tx_maievents_registration.occurrence_start'),
+        (new DatetimeConfig())->setFormat('datetime')
+    )
+    ->addColumn(
         'first_name',
         $lang('tx_maievents_registration.first_name'),
         (new InputConfig())->setSize(30)->setMax(100)->setEval('trim')->setRequired()
@@ -75,6 +80,6 @@ return (new Table($lang('table.tx_maievents_registration')))
     )
     ->addTypeShowItem(
         '0',
-        'event, --palette--;;name, email, status, --palette--;;dates'
+        'event, occurrence_start, --palette--;;name, email, status, --palette--;;dates'
     )
     ->getConfig();

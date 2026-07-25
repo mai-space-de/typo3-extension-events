@@ -45,10 +45,34 @@
             <trans-unit id="tx_maievents_event.categories">
                 <source>Categories</source>
             </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency">
+                <source>Repeat</source>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency.none">
+                <source>Does not repeat</source>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency.daily">
+                <source>Daily</source>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency.weekly">
+                <source>Weekly</source>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency.monthly">
+                <source>Monthly</source>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency.yearly">
+                <source>Yearly</source>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_until">
+                <source>Repeat until (leave empty for no end)</source>
+            </trans-unit>
 
             <!-- tx_maievents_registration field labels -->
             <trans-unit id="tx_maievents_registration.event">
                 <source>Event</source>
+            </trans-unit>
+            <trans-unit id="tx_maievents_registration.occurrence_start">
+                <source>Occurrence date</source>
             </trans-unit>
             <trans-unit id="tx_maievents_registration.first_name">
                 <source>First Name</source>
@@ -84,6 +108,9 @@
             </trans-unit>
             <trans-unit id="palette.registration">
                 <source>Registration Settings</source>
+            </trans-unit>
+            <trans-unit id="palette.recurrence">
+                <source>Recurrence</source>
             </trans-unit>
             <trans-unit id="palette.name">
                 <source>Name</source>

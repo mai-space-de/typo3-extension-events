@@ -60,6 +60,7 @@
                             <th><f:translate key="registration.firstName" extensionName="mai_events" /></th>
                             <th><f:translate key="registration.lastName" extensionName="mai_events" /></th>
                             <th><f:translate key="registration.email" extensionName="mai_events" /></th>
+                            <th><f:translate key="backend.registration.occurrence" extensionName="mai_events" /></th>
                             <th><f:translate key="backend.registration.status" extensionName="mai_events" /></th>
                             <th><f:translate key="backend.registration.waitingList" extensionName="mai_events" /></th>
                             <th><f:translate key="backend.registration.registeredAt" extensionName="mai_events" /></th>
@@ -71,6 +72,11 @@
                                 <td>{registration.firstName}</td>
                                 <td>{registration.lastName}</td>
                                 <td>{registration.email}</td>
+                                <td>
+                                    <f:if condition="{registration.occurrenceStart}">
+                                        <f:format.date format="d.m.Y H:i" date="{registration.occurrenceStart}" />
+                                    </f:if>
+                                </td>
                                 <td>{registration.status}</td>
                                 <td><f:if condition="{registration.waitingList}">✓</f:if></td>
                                 <td>

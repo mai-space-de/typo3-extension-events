@@ -9,6 +9,7 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 class Registration extends AbstractEntity
 {
     protected int $event = 0;
+    protected int $occurrenceStart = 0;
     protected string $firstName = '';
     protected string $lastName = '';
     protected string $email = '';
@@ -26,6 +27,16 @@ class Registration extends AbstractEntity
     public function setEvent(int $event): void
     {
         $this->event = $event;
+    }
+
+    public function getOccurrenceStart(): int
+    {
+        return $this->occurrenceStart;
+    }
+
+    public function setOccurrenceStart(int $occurrenceStart): void
+    {
+        $this->occurrenceStart = $occurrenceStart;
     }
 
     public function getFirstName(): string

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Maispace\MaiEvents\Domain\Model;
 
 /**
- * Represents a single calendar event.
+ * Represents a single calendar event (one concrete occurrence).
  */
 class Event
 {
@@ -19,6 +19,8 @@ class Event
         protected string $url = '',
         protected bool $allDay = false,
         protected string $source = '',
+        protected int $seriesUid = 0,
+        protected int $occurrenceStart = 0,
     ) {}
 
     public function getUid(): string
@@ -64,5 +66,17 @@ class Event
     public function getSource(): string
     {
         return $this->source;
+    }
+
+    public function getSeriesUid(): int
+    {
+        return $this->seriesUid;
+    }
+
+    public function getOccurrenceStart(): int
+    {
+        return $this->occurrenceStart > 0
+            ? $this->occurrenceStart
+            : $this->start->getTimestamp();
     }
 }

@@ -72,6 +72,11 @@ class RegistrationTest extends TestCase
         self::assertNull((new Registration())->getConfirmedAt());
     }
 
+    public function testOccurrenceStartDefaultsToZero(): void
+    {
+        self::assertSame(0, (new Registration())->getOccurrenceStart());
+    }
+
     // -------------------------------------------------------------------------
     // getter / setter round-trips
     // -------------------------------------------------------------------------
@@ -81,6 +86,13 @@ class RegistrationTest extends TestCase
         $reg = new Registration();
         $reg->setEvent(42);
         self::assertSame(42, $reg->getEvent());
+    }
+
+    public function testSetGetOccurrenceStart(): void
+    {
+        $reg = new Registration();
+        $reg->setOccurrenceStart(1_700_000_000);
+        self::assertSame(1_700_000_000, $reg->getOccurrenceStart());
     }
 
     public function testSetGetFirstName(): void

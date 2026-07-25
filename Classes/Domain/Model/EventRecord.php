@@ -16,6 +16,8 @@ class EventRecord extends AbstractEntity
     protected ?int $startDate = null;
     protected ?int $endDate = null;
     protected ?int $registrationDeadline = null;
+    protected string $recurrenceFrequency = '';
+    protected ?int $recurrenceUntil = null;
     protected int $maxAttendees = 0;
     protected bool $hasWaitingList = false;
 
@@ -103,6 +105,71 @@ class EventRecord extends AbstractEntity
     public function setRegistrationDeadline(?int $registrationDeadline): void
     {
         $this->registrationDeadline = $registrationDeadline;
+    }
+
+    public function getRecurrenceFrequency(): string
+    {
+        return $this->recurrenceFrequency;
+    }
+
+    public function setRecurrenceFrequency(string $recurrenceFrequency): void
+    {
+        $this->recurrenceFrequency = $recurrenceFrequency;
+    }
+
+    public function isRecurring(): bool
+    {
+        return $this->recurrenceFrequency !== '';
+    }
+
+    public function getRecurrenceUntil(): ?int
+    {
+        return $this->recurrenceUntil;
+    }
+
+    public function setRecurrenceUntil(?int $recurrenceUntil): void
+    {
+        $this->recurrenceUntil = $recurrenceUntil;
+    }
+
+    public function getRecurrenceUntilAsDateTime(): ?\DateTimeImmutable
+    {
+        if ($this->recurrenceUntil === null || $this->recurrenceUntil === 0) {
+            return null;
+        }
+
+        return (new \DateTimeImmutable())->setTimestamp($this->recurrenceUntil);
+    }
+
+    /**
+     * Resolve the registration deadline for a concrete occurrence.
+     *
+     * For recurring events the series deadline is treated as an offset from the
+     * first start_date and applied to each occurrence.
+     */
+    public function getRegistrationDeadlineForOccurrence(int $occurrenceStart): ?int
+    {
+        if ($this->registrationDeadline === null || $this->registrationDeadline === 0) {
+            return null;
+        }
+
+        if (!$this->isRecurring() || $this->startDate === null || $this->startDate === 0) {
+            return $this->registrationDeadline;
+        }
+
+        $offset = $this->startDate - $this->registrationDeadline;
+
+        return $occurrenceStart - $offset;
+    }
+
+    public function isRegistrationOpenForOccurrence(int $occurrenceStart): bool
+    {
+        $deadline = $this->getRegistrationDeadlineForOccurrence($occurrenceStart);
+        if ($deadline === null) {
+            return true;
+        }
+
+        return $deadline > time();
     }
 
     public function isRegistrationOpen(): bool

@@ -106,6 +106,20 @@ class EventTest extends TestCase
         self::assertSame('', $this->makeEvent()->getSource());
     }
 
+    public function testSeriesUidDefaultsToZero(): void
+    {
+        self::assertSame(0, $this->makeEvent()->getSeriesUid());
+    }
+
+    public function testOccurrenceStartFallsBackToStartTimestamp(): void
+    {
+        $event = $this->makeEvent(start: '2024-06-15 10:00:00');
+        self::assertSame(
+            (new \DateTimeImmutable('2024-06-15 10:00:00'))->getTimestamp(),
+            $event->getOccurrenceStart(),
+        );
+    }
+
     // -------------------------------------------------------------------------
     // optional fields — set values
     // -------------------------------------------------------------------------
@@ -138,6 +152,21 @@ class EventTest extends TestCase
     {
         $event = $this->makeEvent(source: 'tx_maievents');
         self::assertSame('tx_maievents', $event->getSource());
+    }
+
+    public function testGetSeriesUidAndOccurrenceStartReturnConstructorValues(): void
+    {
+        $event = new Event(
+            uid: 'e',
+            title: 'T',
+            start: new \DateTimeImmutable('2024-06-15 10:00:00'),
+            end: new \DateTimeImmutable('2024-06-15 11:00:00'),
+            seriesUid: 42,
+            occurrenceStart: 1718445600,
+        );
+
+        self::assertSame(42, $event->getSeriesUid());
+        self::assertSame(1718445600, $event->getOccurrenceStart());
     }
 
     // -------------------------------------------------------------------------
