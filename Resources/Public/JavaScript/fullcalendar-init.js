@@ -158,18 +158,69 @@
         .slice(0, listLimit);
     }
 
-    var activeViewType = initialView;
+    // Align with theme bp-down(md): below 48rem always use listUpcoming.
+    var MOBILE_MQ = '(max-width: 47.98rem)';
+    var LIST_VIEW = 'listUpcoming';
+    var desktopToolbar = {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,listUpcoming',
+    };
+    var mobileToolbar = {
+      left: 'prev,next today',
+      center: 'title',
+      right: '',
+    };
+
+    /**
+     * @returns {boolean}
+     */
+    function isMobileViewport() {
+      return window.matchMedia(MOBILE_MQ).matches;
+    }
+
+    var lastDesktopView = initialView;
+    var startView = isMobileViewport() ? LIST_VIEW : initialView;
+    var activeViewType = startView;
+    var syncingViewport = false;
+
+    /**
+     * Force list on small viewports; restore the last desktop view when widening.
+     */
+    function syncViewportMode() {
+      if (!calendar || syncingViewport) {
+        return;
+      }
+
+      syncingViewport = true;
+      try {
+        var mobile = isMobileViewport();
+        if (mobile) {
+          calendar.setOption('headerToolbar', mobileToolbar);
+          if (!isListView(calendar.view.type)) {
+            lastDesktopView = calendar.view.type;
+            activeViewType = LIST_VIEW;
+            calendar.changeView(LIST_VIEW);
+          }
+          return;
+        }
+
+        calendar.setOption('headerToolbar', desktopToolbar);
+        if (isListView(calendar.view.type) && lastDesktopView && calendar.view.type !== lastDesktopView) {
+          activeViewType = lastDesktopView;
+          calendar.changeView(lastDesktopView);
+        }
+      } finally {
+        syncingViewport = false;
+      }
+    }
 
     var calendar = new window.FullCalendar.Calendar(mount, {
-      initialView: initialView,
+      initialView: startView,
       initialDate: initialDate,
       locale: locale,
       height: 'auto',
-      headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek,listUpcoming',
-      },
+      headerToolbar: isMobileViewport() ? mobileToolbar : desktopToolbar,
       views: {
         listUpcoming: {
           type: 'list',
@@ -186,7 +237,14 @@
       datesSet: function (info) {
         if (info && info.view && info.view.type) {
           activeViewType = info.view.type;
+          // Remember any desktop choice (incl. list) so resize-back restores it.
+          if (!isMobileViewport() && !syncingViewport) {
+            lastDesktopView = info.view.type;
+          }
         }
+      },
+      windowResize: function () {
+        syncViewportMode();
       },
       events: function (info, successCallback) {
         var viewType = activeViewType;
@@ -208,6 +266,14 @@
     });
 
     calendar.render();
+    syncViewportMode();
+
+    var mobileMql = window.matchMedia(MOBILE_MQ);
+    if (typeof mobileMql.addEventListener === 'function') {
+      mobileMql.addEventListener('change', syncViewportMode);
+    } else if (typeof mobileMql.addListener === 'function') {
+      mobileMql.addListener(syncViewportMode);
+    }
   }
 
   function boot() {
