@@ -130,6 +130,26 @@
     }
 
     /**
+     * @param {Date} date
+     * @returns {Date}
+     */
+    function startOfDay(date) {
+      var copy = new Date(date.getTime());
+      copy.setHours(0, 0, 0, 0);
+      return copy;
+    }
+
+    /**
+     * @param {Date} date
+     * @returns {Date}
+     */
+    function addDays(date, days) {
+      var copy = new Date(date.getTime());
+      copy.setDate(copy.getDate() + days);
+      return copy;
+    }
+
+    /**
      * @param {string} viewType
      * @returns {boolean}
      */
@@ -138,29 +158,64 @@
     }
 
     /**
-     * @param {{ start?: Date }} info
+     * Upcoming events from today onwards (full set; paging applied separately).
+     *
+     * @returns {Array}
+     */
+    function getUpcomingEvents() {
+      var from = startOfToday();
+      return events.filter(function (event) {
+        var start = event && event.start ? new Date(event.start) : null;
+        return start instanceof Date && !isNaN(start.getTime()) && start >= from;
+      });
+    }
+
+    /**
+     * Current list page (next N upcoming events, offset by listOffset).
+     *
+     * @returns {Array}
+     */
+    function getListPageEvents() {
+      return getUpcomingEvents().slice(listOffset, listOffset + listLimit);
+    }
+
+    /**
+     * Visible range covering the current list page so FullCalendar shows those events.
+     *
+     * @returns {{ start: Date, end: Date }}
+     */
+    function computeListVisibleRange() {
+      var page = getListPageEvents();
+      if (page.length === 0) {
+        var emptyStart = startOfToday();
+        return { start: emptyStart, end: addDays(emptyStart, 1) };
+      }
+
+      var rangeStart = startOfDay(new Date(page[0].start));
+      var last = page[page.length - 1];
+      var lastEnd = last.end ? new Date(last.end) : new Date(last.start);
+      var rangeEnd = addDays(startOfDay(lastEnd), 1);
+      if (rangeEnd <= rangeStart) {
+        rangeEnd = addDays(rangeStart, 1);
+      }
+      return { start: rangeStart, end: rangeEnd };
+    }
+
+    /**
      * @param {string} viewType
      * @returns {Array}
      */
-    function resolveEventsForView(info, viewType) {
+    function resolveEventsForView(viewType) {
       if (!isListView(viewType)) {
         return events;
       }
-
-      var rangeStart = info && info.start instanceof Date ? info.start : startOfToday();
-      var from = new Date(Math.max(rangeStart.getTime(), startOfToday().getTime()));
-
-      return events
-        .filter(function (event) {
-          var start = event && event.start ? new Date(event.start) : null;
-          return start instanceof Date && !isNaN(start.getTime()) && start >= from;
-        })
-        .slice(0, listLimit);
+      return getListPageEvents();
     }
 
     // Align with theme bp-down(md): below 48rem always use listUpcoming.
     var MOBILE_MQ = '(max-width: 47.98rem)';
     var LIST_VIEW = 'listUpcoming';
+    var listOffset = 0;
     var desktopToolbar = {
       left: 'prev,next today',
       center: 'title',
@@ -183,6 +238,54 @@
     var startView = isMobileViewport() ? LIST_VIEW : initialView;
     var activeViewType = startView;
     var syncingViewport = false;
+    var refreshingList = false;
+
+    /**
+     * Enable/disable list paging buttons based on remaining upcoming events.
+     */
+    function updateListNavState() {
+      var prevBtn = mount.querySelector('.fc-prev-button');
+      var nextBtn = mount.querySelector('.fc-next-button');
+      if (!prevBtn && !nextBtn) {
+        return;
+      }
+
+      if (!calendar || !isListView(calendar.view.type)) {
+        if (prevBtn) {
+          prevBtn.disabled = false;
+        }
+        if (nextBtn) {
+          nextBtn.disabled = false;
+        }
+        return;
+      }
+
+      var upcomingCount = getUpcomingEvents().length;
+      if (prevBtn) {
+        prevBtn.disabled = listOffset <= 0;
+      }
+      if (nextBtn) {
+        nextBtn.disabled = listOffset + listLimit >= upcomingCount;
+      }
+    }
+
+    /**
+     * Recompute list visible range + events after paging or entering list view.
+     */
+    function refreshListView() {
+      if (!calendar || refreshingList) {
+        return;
+      }
+      refreshingList = true;
+      try {
+        var range = computeListVisibleRange();
+        calendar.gotoDate(range.start);
+        calendar.refetchEvents();
+        updateListNavState();
+      } finally {
+        refreshingList = false;
+      }
+    }
 
     /**
      * Force list on small viewports; restore the last desktop view when widening.
@@ -199,8 +302,10 @@
           calendar.setOption('headerToolbar', mobileToolbar);
           if (!isListView(calendar.view.type)) {
             lastDesktopView = calendar.view.type;
+            listOffset = 0;
             activeViewType = LIST_VIEW;
             calendar.changeView(LIST_VIEW);
+            refreshListView();
           }
           return;
         }
@@ -224,8 +329,51 @@
       views: {
         listUpcoming: {
           type: 'list',
-          duration: { months: 12 },
+          // Range follows the current event page (not a fixed month/year window).
+          visibleRange: function () {
+            return computeListVisibleRange();
+          },
           buttonText: root.getAttribute('data-label-list') || 'List',
+        },
+      },
+      customButtons: {
+        prev: {
+          click: function () {
+            if (isListView(calendar.view.type)) {
+              if (listOffset <= 0) {
+                return;
+              }
+              listOffset = Math.max(0, listOffset - listLimit);
+              refreshListView();
+              return;
+            }
+            calendar.prev();
+          },
+        },
+        next: {
+          click: function () {
+            if (isListView(calendar.view.type)) {
+              var upcomingCount = getUpcomingEvents().length;
+              if (listOffset + listLimit >= upcomingCount) {
+                return;
+              }
+              listOffset += listLimit;
+              refreshListView();
+              return;
+            }
+            calendar.next();
+          },
+        },
+        today: {
+          text: root.getAttribute('data-label-today') || 'Today',
+          click: function () {
+            if (isListView(calendar.view.type)) {
+              listOffset = 0;
+              refreshListView();
+              return;
+            }
+            calendar.today();
+          },
         },
       },
       buttonText: {
@@ -236,12 +384,22 @@
       },
       datesSet: function (info) {
         if (info && info.view && info.view.type) {
-          activeViewType = info.view.type;
+          var nextType = info.view.type;
+          // Reset paging when switching into the list view from another view.
+          if (isListView(nextType) && !isListView(activeViewType)) {
+            listOffset = 0;
+            if (!refreshingList) {
+              activeViewType = nextType;
+              refreshListView();
+            }
+          }
+          activeViewType = nextType;
           // Remember any desktop choice (incl. list) so resize-back restores it.
           if (!isMobileViewport() && !syncingViewport) {
-            lastDesktopView = info.view.type;
+            lastDesktopView = nextType;
           }
         }
+        updateListNavState();
       },
       windowResize: function () {
         syncViewportMode();
@@ -251,7 +409,7 @@
         if (calendar && calendar.view && calendar.view.type) {
           viewType = calendar.view.type;
         }
-        successCallback(resolveEventsForView(info, viewType));
+        successCallback(resolveEventsForView(viewType));
       },
       eventClick: function (info) {
         var url = info.event.url;
@@ -266,7 +424,11 @@
     });
 
     calendar.render();
+    if (isListView(calendar.view.type)) {
+      refreshListView();
+    }
     syncViewportMode();
+    updateListNavState();
 
     var mobileMql = window.matchMedia(MOBILE_MQ);
     if (typeof mobileMql.addEventListener === 'function') {

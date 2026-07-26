@@ -9,7 +9,7 @@
 * FullCalendar UI — vendored FullCalendar 6 (dayGridMonth / timeGridWeek / listUpcoming) with client-side toolbar navigation; mobile-friendly
 * Mobile list lock — below theme `md` (48rem) the calendar always uses `listUpcoming` and hides month/week switchers; widening restores the last desktop view
 * Initial view — FlexForm / GET `viewMode` maps to FullCalendar (`month`→`dayGridMonth`, `week`→`timeGridWeek`, `list`→`listUpcoming`)
-* List limit — FlexForm `listLimit` (1–100, default 10) caps how many upcoming events the list view shows (next N from today); month/week still use the full preload set
+* List limit — FlexForm `listLimit` (1–100, default 10) caps how many upcoming events the list view shows (next N from today); prev/next page through upcoming events by that page size (not by month/year); month/week still use the full preload set
 * Event link — optional TCA `link` resolved to a frontend URL; click navigates when set
 * Info popup — events without a link open a native `<dialog>` with title, time, location, and sanitized RTE description (links preserved)
 * Category filter — FlexForm `categoryUid` on Calendar View / List plugin (empty = all categories); filters via `sys_category_record_mm`
