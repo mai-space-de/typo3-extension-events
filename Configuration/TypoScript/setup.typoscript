@@ -102,13 +102,4 @@ tt_content {
         }
     }
 
-    maispace_events_list = USER
-    maispace_events_list {
-        userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
-        vendorName = Maispace
-        extensionName = MaiEvents
-        pluginName = List
-        controller = Events
-        action = list
-    }
 }
