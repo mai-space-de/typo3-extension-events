@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="de" datatype="plaintext" original="EXT:mai_events/Resources/Private/Language/locallang_db.xlf"
+          date="2025-01-01T00:00:00Z" product-name="mai_events">
+        <header/>
+        <body>
+            <trans-unit id="plugin.registration.title" resname="plugin.registration.title">
+                <source>Event Registration</source>
+                <target>Veranstaltungsanmeldung</target>
+            </trans-unit>
+            <trans-unit id="tt_content.CType.mai_events_view" resname="tt_content.CType.mai_events_view">
+                <source>Calendar View</source>
+                <target>Kalenderansicht</target>
+            </trans-unit>
+            <trans-unit id="tt_content.pi_flexform.mai_events_view" resname="tt_content.pi_flexform.mai_events_view">
+                <source>Calendar Settings</source>
+                <target>Kalendereinstellungen</target>
+            </trans-unit>
+            <trans-unit id="flexform.sheet.general" resname="flexform.sheet.general">
+                <source>General</source>
+                <target>Allgemein</target>
+            </trans-unit>
+            <trans-unit id="flexform.settings.viewMode" resname="flexform.settings.viewMode">
+                <source>View Mode</source>
+                <target>Ansichtsmodus</target>
+            </trans-unit>
+            <trans-unit id="flexform.settings.viewMode.month" resname="flexform.settings.viewMode.month">
+                <source>Month</source>
+                <target>Monat</target>
+            </trans-unit>
+            <trans-unit id="flexform.settings.viewMode.week" resname="flexform.settings.viewMode.week">
+                <source>Week</source>
+                <target>Woche</target>
+            </trans-unit>
+            <trans-unit id="flexform.settings.viewMode.list" resname="flexform.settings.viewMode.list">
+                <source>List</source>
+                <target>Liste</target>
+            </trans-unit>
+            <trans-unit id="flexform.settings.listLimit" resname="flexform.settings.listLimit">
+                <source>Maximum number of events (list mode)</source>
+                <target>Maximale Anzahl an Veranstaltungen (Listenmodus)</target>
+            </trans-unit>
+            <trans-unit id="flexform.settings.categoryUid" resname="flexform.settings.categoryUid">
+                <source>Category (empty = all categories)</source>
+                <target>Kategorie (leer = alle Kategorien)</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" target-language="de" datatype="plaintext" original="messages"
+          date="2025-01-01T00:00:00Z" product-name="mai_events">
+        <header/>
+        <body>
+            <!-- Table labels -->
+            <trans-unit id="table.tx_maievents_event">
+                <source>Events</source>
+                <target>Veranstaltungen</target>
+            </trans-unit>
+            <trans-unit id="table.tx_maievents_registration">
+                <source>Registrations</source>
+                <target>Anmeldungen</target>
+            </trans-unit>
+
+            <!-- tx_maievents_event field labels -->
+            <trans-unit id="tx_maievents_event.title">
+                <source>Title</source>
+                <target>Titel</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.description">
+                <source>Description</source>
+                <target>Beschreibung</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.location">
+                <source>Location</source>
+                <target>Ort</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.link">
+                <source>Link</source>
+                <target>Link</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.start_date">
+                <source>Start Date</source>
+                <target>Startdatum</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.end_date">
+                <source>End Date</source>
+                <target>Enddatum</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.registration_deadline">
+                <source>Registration Deadline</source>
+                <target>Anmeldeschluss</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.max_attendees">
+                <source>Max. Attendees</source>
+                <target>Max. Teilnehmerzahl</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.has_waiting_list">
+                <source>Enable Waiting List</source>
+                <target>Warteliste aktivieren</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.image">
+                <source>Image</source>
+                <target>Bild</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.image.addFile">
+                <source>Add image</source>
+                <target>Bild hinzufügen</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.categories">
+                <source>Categories</source>
+                <target>Kategorien</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency">
+                <source>Repeat</source>
+                <target>Wiederholung</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency.none">
+                <source>Does not repeat</source>
+                <target>Keine Wiederholung</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency.daily">
+                <source>Daily</source>
+                <target>Täglich</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency.weekly">
+                <source>Weekly</source>
+                <target>Wöchentlich</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency.monthly">
+                <source>Monthly</source>
+                <target>Monatlich</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency.monthly_weekday">
+                <source>Monthly on weekday</source>
+                <target>Monatlich am Wochentag</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_frequency.yearly">
+                <source>Yearly</source>
+                <target>Jährlich</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_month_weekday">
+                <source>Which weekday in the month (weekday from start date)</source>
+                <target>Welcher Wochentag im Monat (Wochentag ausgehend vom Startdatum)</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_month_weekday.1">
+                <source>First</source>
+                <target>Erster</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_month_weekday.2">
+                <source>Second</source>
+                <target>Zweiter</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_month_weekday.3">
+                <source>Third</source>
+                <target>Dritter</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_month_weekday.4">
+                <source>Fourth</source>
+                <target>Vierter</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_month_weekday.last">
+                <source>Last</source>
+                <target>Letzter</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_event.recurrence_until">
+                <source>Repeat until (leave empty for no end)</source>
+                <target>Wiederholen bis (leer lassen für kein Ende)</target>
+            </trans-unit>
+
+            <!-- tx_maievents_registration field labels -->
+            <trans-unit id="tx_maievents_registration.event">
+                <source>Event</source>
+                <target>Veranstaltung</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_registration.occurrence_start">
+                <source>Occurrence date</source>
+                <target>Termin</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_registration.first_name">
+                <source>First Name</source>
+                <target>Vorname</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_registration.last_name">
+                <source>Last Name</source>
+                <target>Nachname</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_registration.email">
+                <source>Email</source>
+                <target>E-Mail</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_registration.status">
+                <source>Status</source>
+                <target>Status</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_registration.status.registered">
+                <source>Registered</source>
+                <target>Angemeldet</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_registration.status.waiting">
+                <source>Waiting</source>
+                <target>Wartend</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_registration.status.cancelled">
+                <source>Cancelled</source>
+                <target>Storniert</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_registration.registered_at">
+                <source>Registered At</source>
+                <target>Angemeldet am</target>
+            </trans-unit>
+            <trans-unit id="tx_maievents_registration.confirmed_at">
+                <source>Confirmed At</source>
+                <target>Bestätigt am</target>
+            </trans-unit>
+
+            <!-- Palette labels -->
+            <trans-unit id="palette.dates">
+                <source>Dates</source>
+                <target>Termine</target>
+            </trans-unit>
+            <trans-unit id="palette.registration">
+                <source>Registration Settings</source>
+                <target>Anmeldeeinstellungen</target>
+            </trans-unit>
+            <trans-unit id="palette.recurrence">
+                <source>Recurrence</source>
+                <target>Wiederholung</target>
+            </trans-unit>
+            <trans-unit id="palette.name">
+                <source>Name</source>
+                <target>Name</target>
+            </trans-unit>
+
+            <!-- Tab labels -->
+            <trans-unit id="tab.dates">
+                <source>Dates</source>
+                <target>Termine</target>
+            </trans-unit>
+            <trans-unit id="tab.registration">
+                <source>Registration</source>
+                <target>Anmeldung</target>
+            </trans-unit>
+            <trans-unit id="tab.language">
+                <source>Language</source>
+                <target>Sprache</target>
+            </trans-unit>
+            <trans-unit id="tab.access">
+                <source>Access</source>
+                <target>Zugriff</target>
+            </trans-unit>
+
+            <trans-unit id="ctype.events_list">
+                <source>Events List</source>
+                <target>Veranstaltungsliste</target>
+            </trans-unit>
+            <trans-unit id="plugin.list.title">
+                <source>Events List</source>
+                <target>Veranstaltungsliste</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
