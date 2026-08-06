@@ -15,6 +15,7 @@ use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Mime\Address;
 use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Extbase\Annotation\Validate;
+use TYPO3\CMS\Extbase\Attribute\RateLimit;
 use TYPO3\CMS\Extbase\Persistence\PersistenceManagerInterface;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
@@ -63,6 +64,7 @@ class RegistrationController extends AbstractActionController
     }
 
     #[Validate(['validator' => 'NotEmpty', 'param' => 'registration'])]
+    #[RateLimit(limit: 5, interval: '15 minutes')]
     public function registerAction(int $eventUid, Registration $registration, int $occurrenceStart = 0): ResponseInterface
     {
         $event = $this->eventRepository->findByUid($eventUid);
