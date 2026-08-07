@@ -9,6 +9,7 @@ use Maispace\MaiSearch\Domain\Dto\SearchResult;
 use Maispace\MaiSearch\Domain\Model\IndexingContext;
 use Maispace\MaiSearch\Domain\Service\SearchResultFormatterInterface;
 use Maispace\MaiSearch\Indexer\AbstractIndexer;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -51,7 +52,7 @@ class EventIndexer extends AbstractIndexer implements SearchResultFormatterInter
             boost: $this->getBoost($this->getType()),
         );
 
-        $this->sendDocument($document);
+        $this->sendDocument($document, $context->languageCode);
     }
 
     public function removeRecord(int $uid, string $table): void
@@ -99,9 +100,18 @@ class EventIndexer extends AbstractIndexer implements SearchResultFormatterInter
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable(self::TABLE_NAME);
 
+        $queryBuilder->select('*')->from(self::TABLE_NAME);
+
+        if ($context->languageUid !== null) {
+            $queryBuilder->where(
+                $queryBuilder->expr()->eq(
+                    'sys_language_uid',
+                    $queryBuilder->createNamedParameter($context->languageUid, Connection::PARAM_INT),
+                ),
+            );
+        }
+
         $rows = $queryBuilder
-            ->select('*')
-            ->from(self::TABLE_NAME)
             ->setMaxResults($context->batchSize)
             ->setFirstResult($context->offset)
             ->executeQuery()
