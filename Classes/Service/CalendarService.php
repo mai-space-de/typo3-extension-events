@@ -7,6 +7,7 @@ namespace Maispace\MaiEvents\Service;
 use Maispace\MaiEvents\Domain\Model\Event;
 use Maispace\MaiEvents\EventProvider\EventProviderInterface;
 use Maispace\MaiEvents\EventProvider\TxEventProvider;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Typolink\LinkFactory;
 
@@ -95,9 +96,29 @@ final class CalendarService
             'events' => $events,
             'fullCalendarEvents' => $this->mapToFullCalendarEvents($events),
             'contentUid' => $contentUid,
-            'locale' => 'de',
+            'locale' => $this->resolveLocale(),
             'listLimit' => $listLimit,
         ];
+    }
+
+    /**
+     * FullCalendar locale code for the current frontend language.
+     */
+    private function resolveLocale(): string
+    {
+        try {
+            $languageId = (int) GeneralUtility::makeInstance(Context::class)
+                ->getPropertyFromAspect('language', 'id');
+        } catch (\Throwable) {
+            return 'de';
+        }
+
+        return match ($languageId) {
+            1 => 'en',
+            2 => 'uk',
+            3 => 'ar',
+            default => 'de',
+        };
     }
 
     public function clampListLimit(int $listLimit): int

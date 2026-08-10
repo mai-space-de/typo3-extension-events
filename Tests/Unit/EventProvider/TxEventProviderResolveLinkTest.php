@@ -36,4 +36,16 @@ final class TxEventProviderResolveLinkTest extends TestCase
         self::assertSame('//cdn.example.org/a', $provider->exposeResolveLink('//cdn.example.org/a'));
         self::assertSame('/path/to/page', $provider->exposeResolveLink('/path/to/page'));
     }
+
+    public function testResolveLanguageIdFallsBackToZeroOutsideFrontend(): void
+    {
+        $provider = new class extends TxEventProvider {
+            public function exposeResolveLanguageId(): int
+            {
+                return $this->resolveLanguageId();
+            }
+        };
+
+        self::assertSame(0, $provider->exposeResolveLanguageId());
+    }
 }

@@ -6,6 +6,7 @@ namespace Maispace\MaiEvents\EventProvider;
 
 use Maispace\MaiEvents\Domain\Model\Event;
 use Maispace\MaiEvents\Service\RecurrenceExpander;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -24,6 +25,7 @@ class TxEventProvider implements EventProviderInterface
     ): array {
         $rangeStartTs = $start->getTimestamp();
         $rangeEndTs = $end->getTimestamp();
+        $languageId = $this->resolveLanguageId();
 
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable('tx_maievents_event');
@@ -49,6 +51,12 @@ class TxEventProvider implements EventProviderInterface
             ->from('tx_maievents_event');
 
         if ($categoryUid > 0) {
+            // Category MM rows live on the default-language record; overlays keep
+            // l10n_source pointing at that UID (0 for default-language rows).
+            $categoryForeignUid = $languageId > 0
+                ? $queryBuilder->quoteIdentifier('tx_maievents_event.l10n_source')
+                : $queryBuilder->quoteIdentifier('tx_maievents_event.uid');
+
             $queryBuilder
                 ->join(
                     'tx_maievents_event',
@@ -57,7 +65,7 @@ class TxEventProvider implements EventProviderInterface
                     (string) $queryBuilder->expr()->and(
                         $queryBuilder->expr()->eq(
                             'mm.uid_foreign',
-                            $queryBuilder->quoteIdentifier('tx_maievents_event.uid'),
+                            $categoryForeignUid,
                         ),
                         $queryBuilder->expr()->eq(
                             'mm.uid_local',
@@ -77,6 +85,10 @@ class TxEventProvider implements EventProviderInterface
 
         $rows = $queryBuilder
             ->where(
+                $queryBuilder->expr()->eq(
+                    'tx_maievents_event.sys_language_uid',
+                    $queryBuilder->createNamedParameter($languageId, Connection::PARAM_INT),
+                ),
                 $queryBuilder->expr()->lt('tx_maievents_event.start_date', $queryBuilder->createNamedParameter($rangeEndTs, Connection::PARAM_INT)),
                 $queryBuilder->expr()->eq('tx_maievents_event.pid', $queryBuilder->createNamedParameter(27, Connection::PARAM_INT)),
                 $queryBuilder->expr()->eq('tx_maievents_event.deleted', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
@@ -98,7 +110,6 @@ class TxEventProvider implements EventProviderInterface
             ->orderBy('tx_maievents_event.start_date', 'ASC')
             ->executeQuery()
             ->fetchAllAssociative();
-
         $rangeStart = \DateTimeImmutable::createFromInterface($start);
         $rangeEnd = \DateTimeImmutable::createFromInterface($end);
 
@@ -181,6 +192,19 @@ class TxEventProvider implements EventProviderInterface
             return $result->getUrl();
         } catch (\Throwable) {
             return '';
+        }
+    }
+
+    /**
+     * Current frontend language UID (0 = default). Falls back to 0 outside FE context.
+     */
+    protected function resolveLanguageId(): int
+    {
+        try {
+            return (int) GeneralUtility::makeInstance(Context::class)
+                ->getPropertyFromAspect('language', 'id');
+        } catch (\Throwable) {
+            return 0;
         }
     }
 }
