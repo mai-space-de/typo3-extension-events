@@ -252,6 +252,7 @@ class EventsDataProcessorTest extends TestCase
                 self::isInstanceOf(\DateTimeInterface::class),
                 self::isInstanceOf(\DateTimeInterface::class),
                 42,
+                0,
             )
             ->willReturn([]);
 
@@ -268,11 +269,34 @@ class EventsDataProcessorTest extends TestCase
                 self::isInstanceOf(\DateTimeInterface::class),
                 self::isInstanceOf(\DateTimeInterface::class),
                 0,
+                0,
             )
             ->willReturn([]);
 
         $processor = $this->makeProcessor([$provider]);
         $processor->process($this->makeContentObject(), [], ['viewMode' => 'list'], []);
+    }
+
+    public function testConfiguredSeriesPageUidIsPassedToProviders(): void
+    {
+        $provider = $this->createMock(EventProviderInterface::class);
+        $provider->expects(self::once())
+            ->method('getEvents')
+            ->with(
+                self::isInstanceOf(\DateTimeInterface::class),
+                self::isInstanceOf(\DateTimeInterface::class),
+                0,
+                8,
+            )
+            ->willReturn([]);
+
+        $processor = $this->makeProcessor([$provider]);
+        $processor->process(
+            $this->makeContentObject(),
+            [],
+            ['viewMode' => 'list', 'seriesPageUid' => 8],
+            [],
+        );
     }
 
     // -------------------------------------------------------------------------

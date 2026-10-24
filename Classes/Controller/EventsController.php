@@ -26,6 +26,9 @@ class EventsController extends AbstractActionController
         $requestedViewMode = is_string($_GET['tx_maievents_view'] ?? null) ? $_GET['tx_maievents_view'] : null;
         $requestedDate = is_string($_GET['tx_maievents_date'] ?? null) ? $_GET['tx_maievents_date'] : null;
 
+        $contentData = $this->getContentObjectData();
+        $seriesPageUid = $this->calendarService->resolveSeriesPageUid((int) ($contentData['pid'] ?? 0));
+
         $calendar = $this->calendarService->buildCalendar(
             requestedViewMode: $requestedViewMode,
             requestedDate: $requestedDate,
@@ -33,7 +36,8 @@ class EventsController extends AbstractActionController
             configuredDate: '',
             listLimit: (int) ($this->settings['listLimit'] ?? 10),
             categoryUid: (int) ($this->settings['categoryUid'] ?? 0),
-            contentUid: (int) ($this->getContentObjectData()['uid'] ?? 0),
+            contentUid: (int) ($contentData['uid'] ?? 0),
+            seriesPageUid: $seriesPageUid,
         );
         $calendar['locale'] = $this->resolveLocale();
 
@@ -53,10 +57,15 @@ class EventsController extends AbstractActionController
             new \DateTimeImmutable('last day of this month midnight'),
         );
 
+        $seriesPageUid = $this->calendarService->resolveSeriesPageUid(
+            (int) ($this->getContentObjectData()['pid'] ?? 0),
+        );
+
         $events = $this->calendarService->aggregateEvents(
             $start,
             $end,
             (int) ($this->settings['categoryUid'] ?? 0),
+            $seriesPageUid,
         );
         $icalContent = $this->iCalExportService->generate($events);
 

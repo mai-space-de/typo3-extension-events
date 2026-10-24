@@ -13,7 +13,7 @@ $lang = Helper::localLangHelperFactory('mai_events', 'Default/locallang_tca.xlf'
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addPlugin([
     'label' => 'LLL:EXT:mai_events/Resources/Private/Language/locallang_db.xlf:tt_content.CType.mai_events_view',
     'value' => 'mai_events_view',
-    'icon' => 'mai-content',
+    'icon' => 'mai-events',
     'group' => 'maispace_plugins_lists',
 ]);
 
@@ -42,7 +42,7 @@ ExtensionUtility::registerPlugin(
     'MaiEvents',
     'List',
     $lang('plugin.list.title'),
-    'mai-content',
+    'mai-events',
     'maispace_plugins_lists',
     '',
     'FILE:EXT:mai_events/Configuration/FlexForms/Events.xml',
@@ -53,6 +53,7 @@ ExtensionUtility::registerPlugin(
     'MaiEvents',
     'Registration',
     'LLL:EXT:mai_events/Resources/Private/Language/locallang_db.xlf:plugin.registration.title',
-    'mai-content',
+    'mai-events-registration',
     'maispace_plugins_interactive',
 );
+

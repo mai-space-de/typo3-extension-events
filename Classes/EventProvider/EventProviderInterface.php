@@ -24,11 +24,14 @@ interface EventProviderInterface
      * @param \DateTimeInterface $start Inclusive start of the range
      * @param \DateTimeInterface $end   Inclusive end of the range
      * @param int $categoryUid         Optional sys_category UID filter (0 = all)
+     * @param int $seriesPageUid       Optional Event page UID (doktype 121); when > 0,
+     *                                 only that series page is returned (category ignored)
      * @return Event[]
      */
     public function getEvents(
         \DateTimeInterface $start,
         \DateTimeInterface $end,
         int $categoryUid = 0,
+        int $seriesPageUid = 0,
     ): array;
 }

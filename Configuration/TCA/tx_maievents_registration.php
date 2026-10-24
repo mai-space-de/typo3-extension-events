@@ -16,14 +16,18 @@ return (new Table($lang('table.tx_maievents_registration')))
     ->setLabel('last_name')
     ->setAlternativeLabelFields('first_name, email')
     ->appendAlternativeLabelToLabel()
-    ->setIconFile('EXT:mai_base/Resources/Public/Icons/generic_table.svg')
+    ->setIconFile('EXT:mai_base/Resources/Public/Icons/all-icons/interface-calendar-check--approve-calendar-check-date-day-month-success--Streamline-Core.svg')
+
     ->setDefaultSorting('ORDER BY registered_at DESC')
     ->addColumn(
         'event',
         $lang('tx_maievents_registration.event'),
         (new SelectSingleConfig())
-            ->setForeignTable('tx_maievents_event')
-            ->setForeignTableWhere('ORDER BY tx_maievents_event.start_date DESC')
+            ->setForeignTable('pages')
+            ->setForeignTableWhere(
+                'AND {#pages}.{#doktype} = 121 AND {#pages}.{#sys_language_uid} = 0'
+                . ' AND {#pages}.{#deleted} = 0 ORDER BY {#pages}.{#tx_maievents_start_date} DESC'
+            )
             ->setMinItems(1)
             ->setMaxItems(1)
     )

@@ -20,7 +20,8 @@ return (new Table($lang('table.tx_maievents_event')))
     ->setDefaultConfig()
     ->setLabel('title')
     ->setAlternativeLabelFields('start_date')
-    ->setIconFile('EXT:mai_base/Resources/Public/Icons/generic_table.svg')
+    ->setIconFile('EXT:mai_base/Resources/Public/Icons/all-icons/interface-calendar--blank-calendar-date-day-month--Streamline-Core.svg')
+
     ->setDefaultSorting('ORDER BY start_date ASC')
     ->setThumbnailField('image')
     ->addColumn(

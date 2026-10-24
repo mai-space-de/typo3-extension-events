@@ -25,6 +25,7 @@ use TYPO3\CMS\Frontend\ContentObject\DataProcessorInterface;
  *   date            = Y-m-d                    (default: today)
  *   listLimit       = 10                        (max upcoming events in list view; clamped 1–100)
  *   categoryUid     = 0                         (default: 0 = all categories)
+ *   seriesPageUid   = 0                         (optional; auto-resolved when CE pid is Event doktype)
  *
  * The processed variable structure passed to the template:
  *   {calendar.viewMode}             string
@@ -62,6 +63,11 @@ class EventsDataProcessor implements DataProcessorInterface
         $requestedViewMode = is_string($_GET['tx_maievents_view'] ?? null) ? $_GET['tx_maievents_view'] : null;
         $requestedDate = is_string($_GET['tx_maievents_date'] ?? null) ? $_GET['tx_maievents_date'] : null;
 
+        $configuredSeriesPageUid = (int) ($processorConfiguration['seriesPageUid'] ?? 0);
+        $seriesPageUid = $configuredSeriesPageUid > 0
+            ? $configuredSeriesPageUid
+            : $this->calendarService->resolveSeriesPageUid((int) ($cObj->data['pid'] ?? 0));
+
         $calendar = $this->calendarService->buildCalendar(
             requestedViewMode: $requestedViewMode,
             requestedDate: $requestedDate,
@@ -70,6 +76,7 @@ class EventsDataProcessor implements DataProcessorInterface
             listLimit: (int) ($processorConfiguration['listLimit'] ?? 10),
             categoryUid: (int) ($processorConfiguration['categoryUid'] ?? 0),
             contentUid: (int) ($cObj->data['uid'] ?? 0),
+            seriesPageUid: $seriesPageUid,
         );
         $calendar['locale'] = $this->resolveLocale($cObj);
 

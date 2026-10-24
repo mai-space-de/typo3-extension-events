@@ -1,23 +1,2 @@
-# mai_events TypoScript Constants
-
-plugin.tx_maievents {
-    persistence {
-        # Default storage PID — override in site config (e.g. BGM setup.typoscript)
-        storagePid = 27
-    }
-    view {
-        templateRootPaths {
-            0 = EXT:mai_events/Resources/Private/Templates/
-        }
-        partialRootPaths {
-            0 = EXT:mai_events/Resources/Private/Partials/
-        }
-        layoutRootPaths {
-            0 = EXT:mai_events/Resources/Private/Layouts/
-        }
-    }
-    settings {
-        defaultViewMode = month
-        listLimit = 10
-    }
-}
+# Event data lives on pages (doktype 121). Repository ignores storagePid.
+plugin.tx_maievents.persistence.storagePid = 0

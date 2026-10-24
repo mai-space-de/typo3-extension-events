@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Maispace\MaiEvents\Service;
 
+use Maispace\MaiBase\Backend\CustomPageModule\DoktypeIds;
 use Maispace\MaiEvents\Domain\Model\Event;
 use Maispace\MaiEvents\EventProvider\EventProviderInterface;
 use Maispace\MaiEvents\EventProvider\TxEventProvider;
 use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Database\Connection;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\Typolink\LinkFactory;
 
@@ -78,6 +81,7 @@ final class CalendarService
         int $listLimit = 10,
         int $categoryUid = 0,
         int $contentUid = 0,
+        int $seriesPageUid = 0,
     ): array {
         $viewMode = $this->resolveViewMode($requestedViewMode, $configuredViewMode);
         $currentDate = $this->resolveCurrentDate($requestedDate, $configuredDate);
@@ -85,7 +89,7 @@ final class CalendarService
 
         // Preload a wide window so FullCalendar can navigate client-side without reloads.
         [$start, $end] = $this->calculatePreloadRange($currentDate);
-        $events = $this->aggregateEvents($start, $end, $categoryUid);
+        $events = $this->aggregateEvents($start, $end, $categoryUid, $seriesPageUid);
 
         return [
             'viewMode' => $viewMode,
@@ -362,16 +366,44 @@ final class CalendarService
     }
 
     /**
+     * When the calendar CE lives on an Event doktype page, that page *is* the series.
+     * Returns the page UID to bind to, or 0 for hub/list calendars.
+     */
+    public function resolveSeriesPageUid(int $contentPid): int
+    {
+        if ($contentPid <= 0) {
+            return 0;
+        }
+
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
+            ->getQueryBuilderForTable('pages');
+        $queryBuilder->getRestrictions()->removeAll();
+
+        $doktype = $queryBuilder
+            ->select('doktype')
+            ->from('pages')
+            ->where(
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($contentPid, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('deleted', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
+            )
+            ->executeQuery()
+            ->fetchOne();
+
+        return ((int) $doktype) === DoktypeIds::EVENT ? $contentPid : 0;
+    }
+
+    /**
      * @return Event[]
      */
     public function aggregateEvents(
         \DateTimeInterface $start,
         \DateTimeInterface $end,
         int $categoryUid = 0,
+        int $seriesPageUid = 0,
     ): array {
         $events = [];
         foreach ($this->getEventProviders() as $provider) {
-            foreach ($provider->getEvents($start, $end, $categoryUid) as $event) {
+            foreach ($provider->getEvents($start, $end, $categoryUid, $seriesPageUid) as $event) {
                 $events[] = $event;
             }
         }

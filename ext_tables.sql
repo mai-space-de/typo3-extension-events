@@ -27,3 +27,18 @@ CREATE TABLE tx_maievents_registration (
     registered_at int(11) DEFAULT 0 NOT NULL,
     confirmed_at int(11) DEFAULT 0 NOT NULL
 );
+
+# Event doktype (121) metadata on pages — Content BGM-19
+CREATE TABLE pages (
+    tx_maievents_location varchar(255) DEFAULT '' NOT NULL,
+    tx_maievents_start_date int(11) DEFAULT 0 NOT NULL,
+    tx_maievents_end_date int(11) DEFAULT 0 NOT NULL,
+    tx_maievents_registration_deadline int(11) DEFAULT 0 NOT NULL,
+    tx_maievents_recurrence_frequency varchar(20) DEFAULT '' NOT NULL,
+    tx_maievents_recurrence_until int(11) DEFAULT 0 NOT NULL,
+    tx_maievents_recurrence_month_weekday tinyint(4) DEFAULT 0 NOT NULL,
+    tx_maievents_max_attendees int(11) DEFAULT 0 NOT NULL,
+    tx_maievents_has_waiting_list tinyint(4) unsigned DEFAULT '0' NOT NULL,
+    tx_maievents_image int(11) unsigned DEFAULT '0' NOT NULL,
+    tx_maievents_legacy_event_uid int(11) DEFAULT 0 NOT NULL
+);

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Maispace\MaiEvents\Tests\Unit\Indexer;
 
+use Maispace\MaiBase\Backend\CustomPageModule\DoktypeIds;
 use Maispace\MaiEvents\Domain\Model\EventRecord;
 use Maispace\MaiEvents\Indexer\EventIndexer;
+use Maispace\MaiSearch\Domain\Model\IndexingContext;
 use Maispace\MaiSearch\Domain\Service\SearchBackendInterface;
 use Maispace\MaiSearch\Service\BackendRegistry;
 use PHPUnit\Framework\Attributes\Test;
@@ -36,7 +38,7 @@ final class EventIndexerTest extends TestCase
             ->method('removeDocument')
             ->with('events', 42);
 
-        $this->subject->removeRecord(42, 'tx_maievents_event');
+        $this->subject->removeRecord(42, 'pages');
     }
 
     #[Test]
@@ -54,9 +56,9 @@ final class EventIndexerTest extends TestCase
     }
 
     #[Test]
-    public function supportsEventsTable(): void
+    public function supportsEventPagesTable(): void
     {
-        self::assertTrue($this->subject->supports('tx_maievents_event'));
+        self::assertTrue($this->subject->supports('pages'));
     }
 
     #[Test]
@@ -64,7 +66,7 @@ final class EventIndexerTest extends TestCase
     {
         self::assertFalse($this->subject->supports('tx_mainews_news'));
         self::assertFalse($this->subject->supports('tx_maifaq_faq'));
-        self::assertFalse($this->subject->supports('pages'));
+        self::assertFalse($this->subject->supports('tx_maievents_event'));
         self::assertFalse($this->subject->supports('tt_content'));
     }
 
@@ -98,6 +100,42 @@ final class EventIndexerTest extends TestCase
         $content = $this->invokeBuildContent(new \stdClass());
 
         self::assertSame('', $content);
+    }
+
+    #[Test]
+    public function indexRecordAcceptsStdClassEventPageFromQueue(): void
+    {
+        $page = new \stdClass();
+        $page->uid = 55;
+        $page->doktype = DoktypeIds::EVENT;
+        $page->title = 'Queued Event';
+        $page->tx_maievents_location = 'Hall';
+        $page->tx_maievents_start_date = 1700000000;
+        $page->abstract = 'Abstract';
+
+        $this->activeBackend
+            ->expects(self::once())
+            ->method('indexDocument')
+            ->with(self::callback(static function (object $document): bool {
+                return $document->type === 'events'
+                    && $document->uid === 55
+                    && $document->title === 'Queued Event';
+            }));
+
+        $this->subject->indexRecord($page, new IndexingContext(core: 'core_de'));
+    }
+
+    #[Test]
+    public function indexRecordSkipsNonEventDoktypeStdClass(): void
+    {
+        $page = new \stdClass();
+        $page->uid = 7;
+        $page->doktype = DoktypeIds::NEWS;
+        $page->title = 'News page';
+
+        $this->activeBackend->expects(self::never())->method('indexDocument');
+
+        $this->subject->indexRecord($page, new IndexingContext(core: 'core_de'));
     }
 
     #[Test]

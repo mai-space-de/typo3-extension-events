@@ -14,7 +14,12 @@ class EventRecord extends AbstractEntity
     protected string $title = '';
     protected string $description = '';
     protected string $location = '';
+    /**
+     * Legacy link field — no longer stored on pages (the page is the target).
+     * Kept for unit-test BC and temporary parallel-read helpers.
+     */
     protected string $link = '';
+    protected int $doktype = 0;
     protected ?int $startDate = null;
     protected ?int $endDate = null;
     protected ?int $registrationDeadline = null;
@@ -84,6 +89,16 @@ class EventRecord extends AbstractEntity
     public function setLink(string $link): void
     {
         $this->link = $link;
+    }
+
+    public function getDoktype(): int
+    {
+        return $this->doktype;
+    }
+
+    public function setDoktype(int $doktype): void
+    {
+        $this->doktype = $doktype;
     }
 
     public function getStartDate(): ?int

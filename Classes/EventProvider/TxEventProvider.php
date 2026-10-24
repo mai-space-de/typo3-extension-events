@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Maispace\MaiEvents\EventProvider;
 
+use Maispace\MaiBase\Backend\CustomPageModule\DoktypeIds;
 use Maispace\MaiEvents\Domain\Model\Event;
 use Maispace\MaiEvents\Service\RecurrenceExpander;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Frontend\Typolink\LinkFactory;
 
+/**
+ * Loads calendar occurrences from Event doktype pages (121).
+ */
 class TxEventProvider implements EventProviderInterface
 {
     public function __construct(
@@ -22,44 +26,42 @@ class TxEventProvider implements EventProviderInterface
         \DateTimeInterface $start,
         \DateTimeInterface $end,
         int $categoryUid = 0,
+        int $seriesPageUid = 0,
     ): array {
         $rangeStartTs = $start->getTimestamp();
         $rangeEndTs = $end->getTimestamp();
         $languageId = $this->resolveLanguageId();
 
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
-            ->getQueryBuilderForTable('tx_maievents_event');
+            ->getQueryBuilderForTable('pages');
         $queryBuilder->getRestrictions()->removeAll();
 
-        // Series that can produce occurrences overlapping the window:
-        // - first start before range end
-        // - and either non-recurring with start in window, or recurring with until >= range start
-        //   (until=0 treated as non-recurring fallback handled by expander)
         $queryBuilder
             ->select(
-                'tx_maievents_event.uid',
-                'tx_maievents_event.title',
-                'tx_maievents_event.start_date',
-                'tx_maievents_event.end_date',
-                'tx_maievents_event.description',
-                'tx_maievents_event.location',
-                'tx_maievents_event.link',
-                'tx_maievents_event.recurrence_frequency',
-                'tx_maievents_event.recurrence_until',
-                'tx_maievents_event.recurrence_month_weekday',
+                'pages.uid',
+                'pages.title',
+                'pages.abstract',
+                'pages.tx_maievents_start_date',
+                'pages.tx_maievents_end_date',
+                'pages.tx_maievents_location',
+                'pages.tx_maievents_recurrence_frequency',
+                'pages.tx_maievents_recurrence_until',
+                'pages.tx_maievents_recurrence_month_weekday',
             )
-            ->from('tx_maievents_event');
+            ->from('pages');
 
-        if ($categoryUid > 0) {
+        // Series page binding (Event Angebotsseite): the page *is* the series.
+        // Takes precedence over category filters used on hub/list calendars.
+        if ($seriesPageUid <= 0 && $categoryUid > 0) {
             // Category MM rows live on the default-language record; overlays keep
             // l10n_source pointing at that UID (0 for default-language rows).
             $categoryForeignUid = $languageId > 0
-                ? $queryBuilder->quoteIdentifier('tx_maievents_event.l10n_source')
-                : $queryBuilder->quoteIdentifier('tx_maievents_event.uid');
+                ? $queryBuilder->quoteIdentifier('pages.l10n_source')
+                : $queryBuilder->quoteIdentifier('pages.uid');
 
             $queryBuilder
                 ->join(
-                    'tx_maievents_event',
+                    'pages',
                     'sys_category_record_mm',
                     'mm',
                     (string) $queryBuilder->expr()->and(
@@ -73,7 +75,7 @@ class TxEventProvider implements EventProviderInterface
                         ),
                         $queryBuilder->expr()->eq(
                             'mm.tablenames',
-                            $queryBuilder->createNamedParameter('tx_maievents_event'),
+                            $queryBuilder->createNamedParameter('pages'),
                         ),
                         $queryBuilder->expr()->eq(
                             'mm.fieldname',
@@ -83,55 +85,99 @@ class TxEventProvider implements EventProviderInterface
                 );
         }
 
-        $rows = $queryBuilder
-            ->where(
-                $queryBuilder->expr()->eq(
-                    'tx_maievents_event.sys_language_uid',
-                    $queryBuilder->createNamedParameter($languageId, Connection::PARAM_INT),
-                ),
-                $queryBuilder->expr()->lt('tx_maievents_event.start_date', $queryBuilder->createNamedParameter($rangeEndTs, Connection::PARAM_INT)),
-                $queryBuilder->expr()->eq('tx_maievents_event.pid', $queryBuilder->createNamedParameter(27, Connection::PARAM_INT)),
-                $queryBuilder->expr()->eq('tx_maievents_event.deleted', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
-                $queryBuilder->expr()->eq('tx_maievents_event.hidden', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
-                $queryBuilder->expr()->or(
-                    $queryBuilder->expr()->and(
-                        $queryBuilder->expr()->eq('tx_maievents_event.recurrence_frequency', $queryBuilder->createNamedParameter('')),
-                        $queryBuilder->expr()->gte('tx_maievents_event.start_date', $queryBuilder->createNamedParameter($rangeStartTs, Connection::PARAM_INT)),
+        $constraints = [
+            $queryBuilder->expr()->eq(
+                'pages.doktype',
+                $queryBuilder->createNamedParameter(DoktypeIds::EVENT, Connection::PARAM_INT),
+            ),
+            $queryBuilder->expr()->eq(
+                'pages.sys_language_uid',
+                $queryBuilder->createNamedParameter($languageId, Connection::PARAM_INT),
+            ),
+            $queryBuilder->expr()->lt(
+                'pages.tx_maievents_start_date',
+                $queryBuilder->createNamedParameter($rangeEndTs, Connection::PARAM_INT),
+            ),
+            $queryBuilder->expr()->eq('pages.deleted', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
+            $queryBuilder->expr()->eq('pages.hidden', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
+            $queryBuilder->expr()->or(
+                $queryBuilder->expr()->and(
+                    $queryBuilder->expr()->eq(
+                        'pages.tx_maievents_recurrence_frequency',
+                        $queryBuilder->createNamedParameter(''),
                     ),
-                    $queryBuilder->expr()->and(
-                        $queryBuilder->expr()->neq('tx_maievents_event.recurrence_frequency', $queryBuilder->createNamedParameter('')),
-                        $queryBuilder->expr()->or(
-                            $queryBuilder->expr()->eq('tx_maievents_event.recurrence_until', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
-                            $queryBuilder->expr()->gte('tx_maievents_event.recurrence_until', $queryBuilder->createNamedParameter($rangeStartTs, Connection::PARAM_INT)),
+                    $queryBuilder->expr()->gte(
+                        'pages.tx_maievents_start_date',
+                        $queryBuilder->createNamedParameter($rangeStartTs, Connection::PARAM_INT),
+                    ),
+                ),
+                $queryBuilder->expr()->and(
+                    $queryBuilder->expr()->neq(
+                        'pages.tx_maievents_recurrence_frequency',
+                        $queryBuilder->createNamedParameter(''),
+                    ),
+                    $queryBuilder->expr()->or(
+                        $queryBuilder->expr()->eq(
+                            'pages.tx_maievents_recurrence_until',
+                            $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
+                        ),
+                        $queryBuilder->expr()->gte(
+                            'pages.tx_maievents_recurrence_until',
+                            $queryBuilder->createNamedParameter($rangeStartTs, Connection::PARAM_INT),
                         ),
                     ),
                 ),
-            )
-            ->orderBy('tx_maievents_event.start_date', 'ASC')
+            ),
+        ];
+
+        if ($seriesPageUid > 0) {
+            // CE may live on the default-language page while the FE language is an
+            // overlay (match via l10n_source), or on the overlay page itself (uid).
+            $constraints[] = $languageId > 0
+                ? (string) $queryBuilder->expr()->or(
+                    $queryBuilder->expr()->eq(
+                        'pages.uid',
+                        $queryBuilder->createNamedParameter($seriesPageUid, Connection::PARAM_INT),
+                    ),
+                    $queryBuilder->expr()->eq(
+                        'pages.l10n_source',
+                        $queryBuilder->createNamedParameter($seriesPageUid, Connection::PARAM_INT),
+                    ),
+                )
+                : $queryBuilder->expr()->eq(
+                    'pages.uid',
+                    $queryBuilder->createNamedParameter($seriesPageUid, Connection::PARAM_INT),
+                );
+        }
+
+        $rows = $queryBuilder
+            ->where(...$constraints)
+            ->orderBy('pages.tx_maievents_start_date', 'ASC')
             ->executeQuery()
             ->fetchAllAssociative();
+
         $rangeStart = \DateTimeImmutable::createFromInterface($start);
         $rangeEnd = \DateTimeImmutable::createFromInterface($end);
 
         $events = [];
         foreach ($rows as $row) {
-            $seriesStartTs = (int) $row['start_date'];
+            $seriesStartTs = (int) $row['tx_maievents_start_date'];
             if ($seriesStartTs <= 0) {
                 continue;
             }
 
             $seriesStart = (new \DateTimeImmutable())->setTimestamp($seriesStartTs);
-            $seriesEndTs = (int) $row['end_date'];
+            $seriesEndTs = (int) $row['tx_maievents_end_date'];
             $seriesEnd = $seriesEndTs > 0
                 ? (new \DateTimeImmutable())->setTimestamp($seriesEndTs)
                 : $seriesStart;
 
-            $frequency = (string) ($row['recurrence_frequency'] ?? '');
-            $untilTs = (int) ($row['recurrence_until'] ?? 0);
+            $frequency = (string) ($row['tx_maievents_recurrence_frequency'] ?? '');
+            $untilTs = (int) ($row['tx_maievents_recurrence_until'] ?? 0);
             $until = $untilTs > 0
                 ? (new \DateTimeImmutable())->setTimestamp($untilTs)
                 : null;
-            $monthWeekday = (int) ($row['recurrence_month_weekday'] ?? 0);
+            $monthWeekday = (int) ($row['tx_maievents_recurrence_month_weekday'] ?? 0);
 
             $occurrences = $this->recurrenceExpander->expand(
                 $seriesStart,
@@ -144,7 +190,8 @@ class TxEventProvider implements EventProviderInterface
             );
 
             $seriesUid = (int) $row['uid'];
-            $resolvedUrl = $this->resolveLink((string) ($row['link'] ?? ''));
+            $resolvedUrl = $this->resolvePageUrl($seriesUid);
+            $description = (string) ($row['abstract'] ?? '');
             foreach ($occurrences as $occurrence) {
                 $occurrenceStart = $occurrence['start']->getTimestamp();
                 $events[] = new Event(
@@ -152,8 +199,8 @@ class TxEventProvider implements EventProviderInterface
                     title: (string) $row['title'],
                     start: $occurrence['start'],
                     end: $occurrence['end'],
-                    description: (string) ($row['description'] ?? ''),
-                    location: (string) $row['location'],
+                    description: $description,
+                    location: (string) ($row['tx_maievents_location'] ?? ''),
                     url: $resolvedUrl,
                     source: 'tx_maievents',
                     seriesUid: $seriesUid,
@@ -171,25 +218,18 @@ class TxEventProvider implements EventProviderInterface
     }
 
     /**
-     * Resolve a TCA link field value to a frontend URL.
-     * Plain http(s)/path values are returned as-is; typolink URNs go through LinkFactory.
+     * Frontend URL for an Event page (doktype 121) via the site router.
      */
-    protected function resolveLink(string $link): string
+    protected function resolvePageUrl(int $pageUid): string
     {
-        $link = trim($link);
-        if ($link === '') {
+        if ($pageUid <= 0) {
             return '';
         }
 
-        if (preg_match('#^(https?:)?//#i', $link) === 1 || str_starts_with($link, '/')) {
-            return $link;
-        }
-
         try {
-            $linkFactory = GeneralUtility::makeInstance(LinkFactory::class);
-            $result = $linkFactory->createUri($link);
+            $site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($pageUid);
 
-            return $result->getUrl();
+            return (string) $site->getRouter()->generateUri($pageUid);
         } catch (\Throwable) {
             return '';
         }
