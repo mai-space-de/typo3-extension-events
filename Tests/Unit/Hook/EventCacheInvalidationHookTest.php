@@ -40,21 +40,6 @@ final class EventCacheInvalidationHookTest extends TestCase
     }
 
     #[Test]
-    public function legacyEventRecordUpdateStillFlushesCache(): void
-    {
-        $this->cacheService->expects(self::once())->method('clearCacheForRecord')->with('tx_maievents_event', 8);
-        $this->cacheService->expects(self::once())->method('clearCachesOfRegisteredPageIds');
-
-        (new EventCacheInvalidationHook($this->cacheService))->processDatamap_afterDatabaseOperations(
-            'update',
-            'tx_maievents_event',
-            8,
-            ['title' => 'Updated event'],
-            $this->dataHandler,
-        );
-    }
-
-    #[Test]
     public function nonEventPageUpdateDoesNotFlush(): void
     {
         $this->cacheService->expects(self::never())->method('clearCacheForRecord');
@@ -65,6 +50,21 @@ final class EventCacheInvalidationHookTest extends TestCase
             'pages',
             1,
             ['title' => 'Home'],
+            $this->dataHandler,
+        );
+    }
+
+    #[Test]
+    public function legacyEventTableUpdateDoesNotFlush(): void
+    {
+        $this->cacheService->expects(self::never())->method('clearCacheForRecord');
+        $this->cacheService->expects(self::never())->method('clearCachesOfRegisteredPageIds');
+
+        (new EventCacheInvalidationHook($this->cacheService))->processDatamap_afterDatabaseOperations(
+            'update',
+            'tx_maievents_event',
+            8,
+            ['title' => 'Updated event'],
             $this->dataHandler,
         );
     }

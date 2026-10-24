@@ -1,20 +1,3 @@
-CREATE TABLE tx_maievents_event (
-    title varchar(255) DEFAULT '' NOT NULL,
-    description text,
-    location varchar(255) DEFAULT '' NOT NULL,
-    link varchar(2048) DEFAULT '' NOT NULL,
-    start_date int(11) DEFAULT 0 NOT NULL,
-    end_date int(11) DEFAULT 0 NOT NULL,
-    registration_deadline int(11) DEFAULT 0 NOT NULL,
-    recurrence_frequency varchar(20) DEFAULT '' NOT NULL,
-    recurrence_until int(11) DEFAULT 0 NOT NULL,
-    recurrence_month_weekday tinyint(4) DEFAULT 0 NOT NULL,
-    max_attendees int(11) DEFAULT 0 NOT NULL,
-    has_waiting_list tinyint(4) unsigned DEFAULT '0' NOT NULL,
-    image int(11) unsigned DEFAULT '0' NOT NULL,
-    categories int(11) unsigned DEFAULT '0' NOT NULL
-);
-
 CREATE TABLE tx_maievents_registration (
     event int(11) DEFAULT 0 NOT NULL,
     occurrence_start int(11) DEFAULT 0 NOT NULL,

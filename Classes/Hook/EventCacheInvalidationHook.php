@@ -9,7 +9,7 @@ use Maispace\MaiBase\Hook\AbstractRecordCacheInvalidationHook;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 
 /**
- * Flushes calendar/list page cache tags when an Event page (or legacy record) changes.
+ * Flushes calendar/list page cache tags when an Event page changes.
  */
 final class EventCacheInvalidationHook extends AbstractRecordCacheInvalidationHook
 {
@@ -25,17 +25,6 @@ final class EventCacheInvalidationHook extends AbstractRecordCacheInvalidationHo
         array $fieldArray,
         DataHandler $dataHandler,
     ): void {
-        if ($table === 'tx_maievents_event') {
-            $uid = $status === 'new'
-                ? (int) ($dataHandler->substNEWwithIDs[$id] ?? 0)
-                : (int) $id;
-            if ($uid > 0) {
-                $this->flushCachesForRecord($table, $uid);
-            }
-
-            return;
-        }
-
         if ($table !== 'pages' || !$this->isEventPageChange($fieldArray, $dataHandler)) {
             return;
         }
@@ -50,14 +39,6 @@ final class EventCacheInvalidationHook extends AbstractRecordCacheInvalidationHo
         bool &$recordWasDeleted,
         DataHandler $dataHandler,
     ): void {
-        if ($table === 'tx_maievents_event') {
-            if ($id > 0) {
-                $this->flushCachesForRecord($table, $id);
-            }
-
-            return;
-        }
-
         if ($table !== 'pages') {
             return;
         }

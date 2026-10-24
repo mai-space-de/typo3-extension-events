@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <path fill="currentColor" d="M52 14H12c-1.1 0-2 .9-2 2v36c0 1.1.9 2 2 2h40c1.1 0 2-.9 2-2V16c0-1.1-.9-2-2-2zm-40 8h40v28H12V22z"/>
-  <g opacity=".4"><rect fill="currentColor" x="10" y="14" width="44" height="8"/></g>
-  <rect fill="currentColor" x="20" y="10" width="4" height="10" rx="2"/>
-  <rect fill="currentColor" x="40" y="10" width="4" height="10" rx="2"/>
-  <path fill="var(--icon-color-accent, #ff8700)" d="M28 30h8v8h-8z"/>
-  <path fill="currentColor" d="M16 30h8v4h-8zm20 0h12v4H36zM16 38h8v4h-8zm12 0h8v4h-8zm12 0h8v4h-8z"/>
-</svg>
