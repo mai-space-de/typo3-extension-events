@@ -41,3 +41,21 @@ services:
     tags:
       - name: 'maispace.search.indexer'
       - name: 'maispace.search.result_formatter'
+
+  dashboard.widget.maiEventsManual:
+    class: 'ProudNerds\PnBackendManual\Widgets\ManualWidget'
+    arguments:
+      $options:
+        file: 'EXT:mai_events/Resources/Private/Manual/Manual.md'
+        numbered: true
+        contentsDepth: 2
+        printButton: true
+    tags:
+      - name: dashboard.widget
+        identifier: 'maiEventsManual'
+        groupNames: 'documentation'
+        title: 'Handbuch: Veranstaltungen'
+        description: 'Kurze Anleitung für Termine, Serien und Anmeldungen.'
+        iconIdentifier: 'content-book'
+        height: 'medium'
+        width: 'medium'
