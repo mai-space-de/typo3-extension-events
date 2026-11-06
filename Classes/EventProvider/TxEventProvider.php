@@ -39,6 +39,7 @@ class TxEventProvider implements EventProviderInterface
         $queryBuilder
             ->select(
                 'pages.uid',
+                'pages.l10n_parent',
                 'pages.title',
                 'pages.abstract',
                 'pages.tx_maievents_start_date',
@@ -190,7 +191,11 @@ class TxEventProvider implements EventProviderInterface
             );
 
             $seriesUid = (int) $row['uid'];
-            $resolvedUrl = $this->resolvePageUrl($seriesUid);
+            $resolvedUrl = $this->resolvePageUrl(
+                $seriesUid,
+                $languageId,
+                (int) ($row['l10n_parent'] ?? 0),
+            );
             $description = (string) ($row['abstract'] ?? '');
             foreach ($occurrences as $occurrence) {
                 $occurrenceStart = $occurrence['start']->getTimestamp();
@@ -219,20 +224,39 @@ class TxEventProvider implements EventProviderInterface
 
     /**
      * Frontend URL for an Event page (doktype 121) via the site router.
+     *
+     * Translated rows keep their own uid. The router needs the default-language
+     * uid plus `_language`, otherwise the translated slug is emitted without
+     * the language base (`/en/`, `/ua/`, `/ar/`).
      */
-    protected function resolvePageUrl(int $pageUid): string
+    protected function resolvePageUrl(int $pageUid, int $languageId = 0, int $defaultLanguagePageUid = 0): string
     {
         if ($pageUid <= 0) {
             return '';
         }
 
         try {
-            $site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($pageUid);
+            [$targetUid, $parameters] = $this->resolveRouteArguments($pageUid, $languageId, $defaultLanguagePageUid);
+            $site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($targetUid);
 
-            return (string) $site->getRouter()->generateUri($pageUid);
+            return (string) $site->getRouter()->generateUri($targetUid, $parameters);
         } catch (\Throwable) {
             return '';
         }
+    }
+
+    /**
+     * @return array{0: int, 1: array<string, int>}
+     */
+    protected function resolveRouteArguments(int $pageUid, int $languageId, int $defaultLanguagePageUid): array
+    {
+        if ($languageId <= 0) {
+            return [$pageUid, []];
+        }
+
+        $targetUid = $defaultLanguagePageUid > 0 ? $defaultLanguagePageUid : $pageUid;
+
+        return [$targetUid, ['_language' => $languageId]];
     }
 
     /**
