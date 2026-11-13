@@ -6,13 +6,31 @@ namespace Maispace\MaiEvents\Hook;
 
 use Maispace\MaiBase\Backend\CustomPageModule\DoktypeIds;
 use Maispace\MaiBase\Hook\AbstractRecordCacheInvalidationHook;
+use Maispace\MaiEvents\Controller\EventsController;
+use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Extbase\Service\CacheService;
 
 /**
  * Flushes calendar/list page cache tags when an Event page changes.
  */
 final class EventCacheInvalidationHook extends AbstractRecordCacheInvalidationHook
 {
+    public function __construct(
+        CacheService $cacheService,
+        private readonly CacheManager $cacheManager,
+    ) {
+        parent::__construct($cacheService);
+    }
+
+    protected function flushCachesForRecord(string $table, int $uid): void
+    {
+        parent::flushCachesForRecord($table, $uid);
+        // The calendar is built by CalendarService without Extbase persistence,
+        // so Extbase's own record tags do not cover it.
+        $this->cacheManager->flushCachesByTag(EventsController::CALENDAR_CACHE_TAG);
+    }
+
     protected function getWatchedTable(): string
     {
         return 'pages';

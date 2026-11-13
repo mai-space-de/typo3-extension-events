@@ -22,10 +22,9 @@ defined('TYPO3') or die();
             \Maispace\MaiEvents\Controller\EventsController::class => 'list',
         ],
         [
-            // Non-cacheable: view/date navigation is read from raw GET parameters
-            // (cHash-excluded, see above), so the page cache must never serve a
-            // stale month/week/list variant.
-            \Maispace\MaiEvents\Controller\EventsController::class => 'list',
+            // Cacheable in its default state only. Requests carrying the cHash-excluded
+            // view/date parameters disable caching at runtime (see
+            // EventsController::applyCachePolicy), so a crafted variant is never stored.
         ],
         \TYPO3\CMS\Extbase\Utility\ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT,
     );
