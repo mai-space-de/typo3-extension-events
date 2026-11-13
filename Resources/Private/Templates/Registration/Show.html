@@ -15,6 +15,7 @@
                 </p>
             </f:if>
 
+            <f:flashMessages />
             <f:form.validationResults>
                 <f:if condition="{validationResults.flattenedErrors}">
                     <div class="mai-registration__errors" role="alert">
@@ -48,6 +49,7 @@
                 </div>
 
                 <div class="mai-registration__actions">
+                    <captcha:field />
                     <f:form.submit value="{f:translate(key: 'registration.submit', extensionName: 'mai_events')}" class="mai-registration__submit" />
                 </div>
             </f:form>

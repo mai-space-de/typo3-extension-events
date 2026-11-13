@@ -67,6 +67,12 @@ class RegistrationController extends AbstractActionController
     #[RateLimit(limit: 5, interval: '15 minutes')]
     public function registerAction(int $eventUid, Registration $registration, int $occurrenceStart = 0): ResponseInterface
     {
+        if (!$this->isCaptchaValid()) {
+            $this->flashCaptchaError();
+
+            return $this->redirect('show', null, null, ['eventUid' => $eventUid, 'occurrenceStart' => $occurrenceStart]);
+        }
+
         $event = $this->eventRepository->findByUid($eventUid);
         if (!$event instanceof EventRecord) {
             return $this->htmlResponse('<p class="mai-registration__empty">' . htmlspecialchars($this->translateOrDefault('registration.eventNotFound', 'Event not found.')) . '</p>');
