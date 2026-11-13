@@ -31,6 +31,15 @@ class RegistrationController extends AbstractActionController
         private readonly RecurrenceExpander $recurrenceExpander,
     ) {}
 
+    /**
+     * The form template renders the validation errors itself; the generic Extbase message
+     * ("An error occurred while trying to call ...") would only duplicate them and expose class names.
+     */
+    protected function getErrorFlashMessage(): bool
+    {
+        return false;
+    }
+
     public function showAction(int $eventUid = 0, int $occurrenceStart = 0): ResponseInterface
     {
         $eventUid = $this->resolveEventUid($eventUid);
